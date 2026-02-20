@@ -1,0 +1,167 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Conversa - {{ contact_name }} - Monitor Empresarial{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'messages' %}">Mensagens</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'message_threads' %}">Conversas</a></li>
+                    <li class="breadcrumb-item active">{{ contact_name }}</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-user-circle me-2"></i>
+                        {{ contact_name }}
+                        <small class="text-white-50 ms-2">{{ phone_number }}</small>
+                    </h5>
+                    <div>
+                        <span class="badge bg-light text-dark me-2">
+                            Total: {{ total_messages }}
+                        </span>
+                        <span class="badge bg-success me-2">
+                            Enviadas: {{ sent_count }}
+                        </span>
+                        <span class="badge bg-info">
+                            Recebidas: {{ received_count }}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="card-body conversation-container" style="height: 500px; overflow-y: auto;">
+                    {% for msg in messages %}
+                    <div class="message-bubble {% if msg.direction == 'sent' %}message-sent{% else %}message-received{% endif %}">
+                        <div class="message-header d-flex justify-content-between mb-1">
+                            <small>
+                                {% if msg.direction == 'sent' %}
+                                <i class="fas fa-arrow-up text-white-50 me-1"></i>Eu
+                                {% else %}
+                                <i class="fas fa-arrow-down text-muted me-1"></i>{{ msg.contact_name|default:msg.phone_number }}
+                                {% endif %}
+                            </small>
+                            <small class="text-muted">{{ msg.message_date|date:"d/m/Y H:i" }}</small>
+                        </div>
+                        <div class="message-content">
+                            {{ msg.content|linebreaksbr }}
+                        </div>
+                        {% if msg.message_type == 'mms' and msg.mms_url %}
+                        <div class="message-attachment mt-2">
+                            <a href="{{ msg.mms_url }}" target="_blank" class="btn btn-sm btn-outline-light">
+                                <i class="fas fa-image me-1"></i>Ver anexo
+                            </a>
+                        </div>
+                        {% endif %}
+                        <div class="message-footer text-end mt-1">
+                            {% if msg.is_read and msg.direction == 'sent' %}
+                            <small class="text-white-50"><i class="fas fa-check-double"></i> Lida</small>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-comments fa-4x text-muted mb-3"></i>
+                        <p class="text-muted">Nenhuma mensagem nesta conversa.</p>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div class="card-footer">
+                    <div class="row">
+                        <div class="col-12">
+                            <a href="{% url 'message_threads' %}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Voltar
+                            </a>
+                            <a href="#" class="btn btn-primary" onclick="window.print()">
+                                <i class="fas fa-print me-2"></i>Imprimir
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Paginação -->
+    {% if messages.has_other_pages %}
+    <div class="row">
+        <div class="col-12">
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center">
+                    {% if messages.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ messages.previous_page_number }}">Anterior</a>
+                    </li>
+                    {% endif %}
+
+                    {% for num in messages.paginator.page_range %}
+                        {% if messages.number == num %}
+                        <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                        {% else %}
+                        <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if messages.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ messages.next_page_number }}">Próxima</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.conversation-container {
+    background-color: #f8f9fa;
+    padding: 20px;
+}
+
+.message-bubble {
+    max-width: 80%;
+    padding: 10px 15px;
+    border-radius: 18px;
+    margin-bottom: 15px;
+    clear: both;
+}
+
+.message-sent {
+    background-color: #007bff;
+    color: white;
+    float: right;
+    border-bottom-right-radius: 4px;
+}
+
+.message-received {
+    background-color: #e9ecef;
+    color: #212529;
+    float: left;
+    border-bottom-left-radius: 4px;
+}
+
+.message-header small:last-child {
+    opacity: 0.8;
+}
+
+.message-sent .message-header small:last-child {
+    color: rgba(255,255,255,0.8) !important;
+}
+
+.message-content {
+    word-wrap: break-word;
+}
+</style>
+{% endblock %}

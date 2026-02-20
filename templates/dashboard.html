@@ -1,0 +1,221 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dashboard - Monitor Empresarial{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h2><i class="fas fa-chart-pie me-2"></i>Dashboard</h2>
+        <hr>
+    </div>
+</div>
+
+<!-- Stats Cards -->
+<div class="row g-4 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="card stats-card h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-muted mb-2">Dispositivos</h6>
+                        <h2 class="mb-0">{{ total_devices|default:"0" }}</h2>
+                        <small class="text-success">
+                            <i class="fas fa-arrow-up me-1"></i>{{ active_devices|default:"0" }} ativos
+                        </small>
+                    </div>
+                    <i class="fas fa-mobile-alt fa-3x text-primary opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-6 col-md-3">
+        <div class="card stats-card h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-muted mb-2">Ligações</h6>
+                        <h2 class="mb-0">{{ total_calls|default:"0" }}</h2>
+                        <small class="text-info">Hoje: {{ today_calls|default:"0" }}</small>
+                    </div>
+                    <i class="fas fa-phone fa-3x text-success opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-6 col-md-3">
+        <div class="card stats-card h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-muted mb-2">Mensagens</h6>
+                        <h2 class="mb-0">{{ total_messages|default:"0" }}</h2>
+                        <small class="text-warning">SMS: {{ total_sms|default:"0" }}</small>
+                    </div>
+                    <i class="fas fa-envelope fa-3x text-warning opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-6 col-md-3">
+        <div class="card stats-card h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-muted mb-2">WhatsApp</h6>
+                        <h2 class="mb-0">{{ total_whatsapp|default:"0" }}</h2>
+                        <small class="text-success">Apagadas: {{ deleted_whatsapp|default:"0" }}</small>
+                    </div>
+                    <i class="fab fa-whatsapp fa-3x text-success opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts -->
+<div class="row g-4 mb-4">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Atividade por Dia</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="activityChart" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Distribuição</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="distributionChart" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Activity -->
+<div class="row g-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Atividade Recente</h5>
+                <a href="#" class="btn btn-sm btn-outline-primary">Ver todas</a>
+            </div>
+            <div class="card-body">
+                <div class="list-group list-group-flush">
+                    {% for activity in recent_activities %}
+                    <div class="list-group-item px-0">
+                        <div class="d-flex align-items-center">
+                            <div class="activity-icon me-3">
+                                {% if activity.type == 'call' %}
+                                    <i class="fas fa-phone text-primary"></i>
+                                {% elif activity.type == 'sms' %}
+                                    <i class="fas fa-envelope text-warning"></i>
+                                {% elif activity.type == 'whatsapp' %}
+                                    <i class="fab fa-whatsapp text-success"></i>
+                                {% endif %}
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="d-flex flex-wrap justify-content-between">
+                                    <strong>{{ activity.contact|default:activity.phone_number }}</strong>
+                                    <small class="text-muted">{{ activity.time }}</small>
+                                </div>
+                                <div class="text-muted small">
+                                    {% if activity.type == 'call' %}
+                                        {{ activity.duration }} segundos
+                                    {% else %}
+                                        {{ activity.content|truncatechars:50 }}
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% if activity.is_deleted %}
+                                <i class="fas fa-trash-alt text-danger ms-2"
+                                   title="Mensagem apagada"></i>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p class="text-muted text-center py-3">Nenhuma atividade recente</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Activity Chart
+    const ctx1 = document.getElementById('activityChart').getContext('2d');
+    new Chart(ctx1, {
+        type: 'line',
+        data: {
+            labels: {{ activity_dates|safe }},
+            datasets: [{
+                label: 'Ligações',
+                data: {{ call_counts|safe }},
+                borderColor: 'rgb(75, 192, 192)',
+                tension: 0.1
+            }, {
+                label: 'Mensagens',
+                data: {{ message_counts|safe }},
+                borderColor: 'rgb(255, 159, 64)',
+                tension: 0.1
+            }, {
+                label: 'WhatsApp',
+                data: {{ whatsapp_counts|safe }},
+                borderColor: 'rgb(37, 211, 102)',
+                tension: 0.1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+
+    // Distribution Chart
+    const ctx2 = document.getElementById('distributionChart').getContext('2d');
+    new Chart(ctx2, {
+        type: 'doughnut',
+        data: {
+            labels: ['Ligações', 'SMS', 'WhatsApp'],
+            datasets: [{
+                data: [{{ total_calls|default:"0" }},
+                       {{ total_sms|default:"0" }},
+                       {{ total_whatsapp|default:"0" }}],
+                backgroundColor: [
+                    'rgb(54, 162, 235)',
+                    'rgb(255, 159, 64)',
+                    'rgb(37, 211, 102)'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

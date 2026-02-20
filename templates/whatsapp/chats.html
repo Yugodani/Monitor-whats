@@ -1,0 +1,229 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Chats WhatsApp - Monitor Empresarial{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12 d-flex justify-content-between align-items-center">
+            <h2>
+                <i class="fab fa-whatsapp me-2 text-success"></i>
+                Chats WhatsApp
+            </h2>
+            <a href="{% url 'whatsapp' %}" class="btn btn-outline-primary">
+                <i class="fas fa-arrow-left me-2"></i>Voltar para Mensagens
+            </a>
+        </div>
+    </div>
+
+    <!-- Cards de estatísticas de chats -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h6>Total</h6>
+                    <h3>{{ total_chats }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h6>Privados</h6>
+                    <h3>{{ private_chats }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <h6>Grupos</h6>
+                    <h3>{{ group_chats }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <h6>Não lidas</h6>
+                    <h3>{{ total_unread }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-4">
+                    <input type="text" name="search" class="form-control" placeholder="Buscar por nome ou número..." value="{{ search|default:'' }}">
+                </div>
+                <div class="col-md-2">
+                    <select name="is_group" class="form-select">
+                        <option value="">Todos</option>
+                        <option value="true" {% if is_group_filter == 'true' %}selected{% endif %}>Grupos</option>
+                        <option value="false" {% if is_group_filter == 'false' %}selected{% endif %}>Privados</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select name="is_archived" class="form-select">
+                        <option value="">Todos</option>
+                        <option value="true" {% if is_archived_filter == 'true' %}selected{% endif %}>Arquivados</option>
+                        <option value="false" {% if is_archived_filter == 'false' %}selected{% endif %}>Não arquivados</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-search me-2"></i>Filtrar
+                    </button>
+                </div>
+                <div class="col-md-2">
+                    <a href="{% url 'whatsapp_chats' %}" class="btn btn-outline-secondary w-100">
+                        <i class="fas fa-eraser me-2"></i>Limpar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Lista de chats -->
+    <div class="row">
+        {% for chat in chats %}
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100 {% if chat.unread_count > 0 %}border-success border-2{% endif %} {% if chat.is_archived %}bg-light{% endif %}">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0">
+                        {% if chat.is_group %}
+                        <i class="fas fa-users text-info me-2"></i>
+                        {% else %}
+                        <i class="fas fa-user-circle text-primary me-2"></i>
+                        {% endif %}
+                        {{ chat.contact_name }}
+                    </h6>
+                    <div>
+                        {% if chat.is_muted %}
+                        <i class="fas fa-volume-mute text-warning me-1" title="Silenciado"></i>
+                        {% endif %}
+                        {% if chat.is_archived %}
+                        <i class="fas fa-archive text-secondary" title="Arquivado"></i>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="card-body">
+                    <p class="mb-1"><strong>Número:</strong> {{ chat.phone_number }}</p>
+                    {% if chat.is_group %}
+                    <p class="mb-1"><strong>Grupo:</strong> {{ chat.group_name }}</p>
+                    {% endif %}
+                    <p class="mb-1"><strong>Mensagens:</strong> {{ chat.total_messages }}</p>
+                    <p class="mb-1">
+                        <strong>Não lidas:</strong>
+                        <span class="badge bg-{% if chat.unread_count > 0 %}danger{% else %}secondary{% endif %}">
+                            {{ chat.unread_count }}
+                        </span>
+                    </p>
+                    <p class="mb-1"><strong>Última:</strong> {{ chat.last_message_date|timesince }}</p>
+                    <p class="mb-3 text-muted small">
+                        <i class="fas fa-{% if chat.last_message_type == 'text' %}align-left{% else %}paperclip{% endif %} me-1"></i>
+                        {{ chat.last_message|truncatechars:50 }}
+                    </p>
+
+                    <div class="d-flex justify-content-between flex-wrap gap-2">
+                        <a href="{% url 'whatsapp_chat_detail' chat.chat_id %}" class="btn btn-sm btn-primary">
+                            <i class="fas fa-comments me-1"></i>Abrir Chat
+                        </a>
+                        <div>
+                            {% if not chat.is_archived %}
+                            <a href="{% url 'whatsapp_archive_chat' chat.chat_id %}" class="btn btn-sm btn-outline-warning" onclick="return confirm('Arquivar este chat?')">
+                                <i class="fas fa-archive"></i>
+                            </a>
+                            {% else %}
+                            <a href="{% url 'whatsapp_unarchive_chat' chat.chat_id %}" class="btn btn-sm btn-outline-success" onclick="return confirm('Desarquivar este chat?')">
+                                <i class="fas fa-box-open"></i>
+                            </a>
+                            {% endif %}
+
+                            {% if chat.is_muted %}
+                            <a href="{% url 'whatsapp_unmute_chat' chat.chat_id %}" class="btn btn-sm btn-outline-info" onclick="return confirm('Ativar notificações?')">
+                                <i class="fas fa-volume-up"></i>
+                            </a>
+                            {% else %}
+                            <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#muteModal{{ forloop.counter }}">
+                                <i class="fas fa-volume-mute"></i>
+                            </button>
+
+                            <!-- Modal para silenciar -->
+                            <div class="modal fade" id="muteModal{{ forloop.counter }}" tabindex="-1">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">Silenciar Chat</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <form action="{% url 'whatsapp_mute_chat' chat.chat_id %}" method="post">
+                                            {% csrf_token %}
+                                            <div class="modal-body">
+                                                <p>Silenciar notificações para {{ chat.contact_name }}?</p>
+                                                <select name="hours" class="form-select">
+                                                    <option value="1">1 hora</option>
+                                                    <option value="8">8 horas</option>
+                                                    <option value="24" selected>24 horas</option>
+                                                    <option value="168">1 semana</option>
+                                                    <option value="720">30 dias</option>
+                                                    <option value="8760">1 ano</option>
+                                                </select>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                                <button type="submit" class="btn btn-warning">Silenciar</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="alert alert-info text-center py-5">
+                <i class="fab fa-whatsapp fa-4x text-muted mb-3"></i>
+                <h5>Nenhum chat encontrado</h5>
+                <p class="mb-0">Aguarde a sincronização dos dispositivos ou ajuste os filtros.</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Paginação -->
+    {% if chats.has_other_pages %}
+    <nav aria-label="Page navigation" class="mt-4">
+        <ul class="pagination justify-content-center">
+            {% if chats.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ chats.previous_page_number }}{% if search %}&search={{ search }}{% endif %}{% if is_group_filter %}&is_group={{ is_group_filter }}{% endif %}{% if is_archived_filter %}&is_archived={{ is_archived_filter }}{% endif %}">Anterior</a>
+            </li>
+            {% endif %}
+
+            {% for num in chats.paginator.page_range %}
+                {% if chats.number == num %}
+                <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                {% elif num > chats.number|add:'-3' and num < chats.number|add:'3' %}
+                <li class="page-item"><a class="page-link" href="?page={{ num }}{% if search %}&search={{ search }}{% endif %}{% if is_group_filter %}&is_group={{ is_group_filter }}{% endif %}{% if is_archived_filter %}&is_archived={{ is_archived_filter }}{% endif %}">{{ num }}</a></li>
+                {% endif %}
+            {% endfor %}
+
+            {% if chats.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ chats.next_page_number }}{% if search %}&search={{ search }}{% endif %}{% if is_group_filter %}&is_group={{ is_group_filter }}{% endif %}{% if is_archived_filter %}&is_archived={{ is_archived_filter }}{% endif %}">Próxima</a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,207 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Estatísticas de SMS - Monitor Empresarial{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12 d-flex justify-content-between align-items-center">
+            <h2>
+                <i class="fas fa-chart-bar me-2"></i>
+                Estatísticas de Mensagens SMS
+            </h2>
+            <a href="{% url 'messages' %}" class="btn btn-outline-primary">
+                <i class="fas fa-arrow-left me-2"></i>Voltar
+            </a>
+        </div>
+    </div>
+
+    <!-- Cards de estatísticas por período -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white h-100">
+                <div class="card-header">Hoje</div>
+                <div class="card-body">
+                    <h3>{{ periods.today.total }}</h3>
+                    <p class="mb-1">Enviadas: {{ periods.today.sent }}</p>
+                    <p class="mb-1">Recebidas: {{ periods.today.received }}</p>
+                    <p class="mb-0">Não lidas: {{ periods.today.unread }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card bg-success text-white h-100">
+                <div class="card-header">Últimos 7 dias</div>
+                <div class="card-body">
+                    <h3>{{ periods.week.total }}</h3>
+                    <p class="mb-1">Enviadas: {{ periods.week.sent }}</p>
+                    <p class="mb-1">Recebidas: {{ periods.week.received }}</p>
+                    <p class="mb-0">Não lidas: {{ periods.week.unread }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card bg-info text-white h-100">
+                <div class="card-header">Últimos 30 dias</div>
+                <div class="card-body">
+                    <h3>{{ periods.month.total }}</h3>
+                    <p class="mb-1">Enviadas: {{ periods.month.sent }}</p>
+                    <p class="mb-1">Recebidas: {{ periods.month.received }}</p>
+                    <p class="mb-0">Não lidas: {{ periods.month.unread }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card bg-warning text-white h-100">
+                <div class="card-header">Total Geral</div>
+                <div class="card-body">
+                    <h3>{{ periods.all.total }}</h3>
+                    <p class="mb-1">Enviadas: {{ periods.all.sent }}</p>
+                    <p class="mb-1">Recebidas: {{ periods.all.received }}</p>
+                    <p class="mb-0">Deletadas: {{ periods.all.deleted }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráfico de atividade -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Atividade nos Últimos 30 Dias</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="activityChart" height="100"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top contatos -->
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0">Top Contatos</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Contato</th>
+                                    <th>Número</th>
+                                    <th>Total</th>
+                                    <th>Última</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for contact in top_contacts %}
+                                <tr>
+                                    <td>{{ contact.contact_name|default:"-" }}</td>
+                                    <td>{{ contact.phone_number }}</td>
+                                    <td>{{ contact.total }}</td>
+                                    <td>{{ contact.last_message|date:"d/m/Y" }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="4" class="text-center">Nenhum dado disponível</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Estatísticas por dispositivo -->
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0">Por Dispositivo</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Dispositivo</th>
+                                    <th>Total</th>
+                                    <th>Enviadas</th>
+                                    <th>Recebidas</th>
+                                    <th>Última</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for stat in device_stats %}
+                                <tr>
+                                    <td>{{ stat.device.device_name }}</td>
+                                    <td>{{ stat.total }}</td>
+                                    <td>{{ stat.sent }}</td>
+                                    <td>{{ stat.received }}</td>
+                                    <td>{{ stat.last_message|timesince }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center">Nenhum dispositivo encontrado</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var ctx = document.getElementById('activityChart').getContext('2d');
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: {{ chart_labels|safe }},
+            datasets: [{
+                label: 'Enviadas',
+                data: {{ chart_sent|safe }},
+                borderColor: 'rgb(40, 167, 69)',
+                backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                tension: 0.1
+            }, {
+                label: 'Recebidas',
+                data: {{ chart_received|safe }},
+                borderColor: 'rgb(23, 162, 184)',
+                backgroundColor: 'rgba(23, 162, 184, 0.1)',
+                tension: 0.1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    }
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

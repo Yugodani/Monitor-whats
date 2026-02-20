@@ -1,0 +1,273 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}WhatsApp - Monitor Empresarial{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12 d-flex justify-content-between align-items-center flex-wrap">
+            <h2>
+                <i class="fab fa-whatsapp me-2 text-success"></i>
+                Mensagens WhatsApp
+            </h2>
+            <div class="mt-2 mt-sm-0">
+                <a href="{% url 'whatsapp_chats' %}" class="btn btn-info me-2">
+                    <i class="fas fa-comments me-2"></i>Chats
+                </a>
+                <a href="{% url 'whatsapp_statistics' %}" class="btn btn-primary me-2">
+                    <i class="fas fa-chart-bar me-2"></i>Estatísticas
+                </a>
+                <a href="{% url 'whatsapp_export' %}" class="btn btn-success">
+                    <i class="fas fa-download me-2"></i>Exportar
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cards de estatísticas -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h6>Total</h6>
+                    <h3>{{ total_messages }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h6>Enviadas</h6>
+                    <h3>{{ sent_count }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <h6>Recebidas</h6>
+                    <h3>{{ received_count }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <h6>Texto/Mídia</h6>
+                    <h3>{{ text_count }}/{{ media_count }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-3">
+                    <select name="device" class="form-select">
+                        <option value="">Todos os dispositivos</option>
+                        {% for device in devices %}
+                        <option value="{{ device.id }}" {% if device_filter == device.id|stringformat:"s" %}selected{% endif %}>
+                            {{ device.device_name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <select name="chat" class="form-select">
+                        <option value="">Todos os chats</option>
+                        {% for chat in chats %}
+                        <option value="{{ chat.chat_id }}" {% if chat_filter == chat.chat_id %}selected{% endif %}>
+                            {{ chat.contact_name }} ({{ chat.phone_number }})
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <select name="direction" class="form-select">
+                        <option value="">Todas</option>
+                        <option value="sent" {% if direction_filter == 'sent' %}selected{% endif %}>Enviadas</option>
+                        <option value="received" {% if direction_filter == 'received' %}selected{% endif %}>Recebidas</option>
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <select name="type" class="form-select">
+                        <option value="">Todos os tipos</option>
+                        <option value="text" {% if type_filter == 'text' %}selected{% endif %}>Texto</option>
+                        <option value="image" {% if type_filter == 'image' %}selected{% endif %}>Imagem</option>
+                        <option value="audio" {% if type_filter == 'audio' %}selected{% endif %}>Áudio</option>
+                        <option value="video" {% if type_filter == 'video' %}selected{% endif %}>Vídeo</option>
+                        <option value="document" {% if type_filter == 'document' %}selected{% endif %}>Documento</option>
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <div class="input-group">
+                        <input type="text" name="search" class="form-control" placeholder="Buscar..." value="{{ search }}">
+                        <button class="btn btn-primary" type="submit">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+            <!-- Filtros de data -->
+            <div class="row mt-3">
+                <div class="col-md-3">
+                    <input type="date" name="start_date" class="form-control" value="{{ start_date }}" placeholder="Data inicial">
+                </div>
+                <div class="col-md-3">
+                    <input type="date" name="end_date" class="form-control" value="{{ end_date }}" placeholder="Data final">
+                </div>
+                <div class="col-md-6">
+                    <a href="{% url 'whatsapp' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-eraser me-2"></i>Limpar Filtros
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lista de mensagens -->
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Data/Hora</th>
+                            <th>Chat</th>
+                            <th>Tipo</th>
+                            <th>Direção</th>
+                            <th>Mensagem</th>
+                            <th>Mídia</th>
+                            <th>Status</th>
+                            <th>Dispositivo</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for msg in messages %}
+                        <tr class="{% if not msg.is_read and msg.direction == 'received' %}table-info{% endif %} {% if msg.is_deleted %}text-muted{% endif %}">
+                            <td>{{ msg.message_date|date:"d/m/Y H:i" }}</td>
+                            <td>
+                                {% if msg.is_group %}
+                                <i class="fas fa-users text-info me-1" title="Grupo"></i>
+                                {% else %}
+                                <i class="fas fa-user text-primary me-1" title="Privado"></i>
+                                {% endif %}
+                                {{ msg.contact_name|default:msg.phone_number|truncatechars:20 }}
+                            </td>
+                            <td>
+                                <span class="badge bg-{% if msg.message_type == 'text' %}secondary{% elif msg.message_type == 'image' %}success{% elif msg.message_type == 'audio' %}info{% elif msg.message_type == 'video' %}danger{% else %}warning{% endif %}">
+                                    {{ msg.get_message_type_display }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if msg.direction == 'sent' %}
+                                <i class="fas fa-arrow-up text-success" title="Enviada"></i>
+                                {% else %}
+                                <i class="fas fa-arrow-down text-info" title="Recebida"></i>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="message-preview" data-bs-toggle="tooltip" title="{{ msg.content }}">
+                                    {% if msg.is_deleted %}
+                                    <em class="text-danger">[Mensagem apagada]</em>
+                                    {% else %}
+                                    {{ msg.content|truncatechars:50 }}
+                                    {% endif %}
+                                </span>
+                            </td>
+                            <td>
+                                {% if msg.media_url %}
+                                <i class="fas fa-paperclip text-primary" title="Com mídia"></i>
+                                {% else %}
+                                -
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if msg.is_read %}
+                                <span class="badge bg-success">Lida</span>
+                                {% else %}
+                                <span class="badge bg-warning">Não lida</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ msg.device.device_name|truncatechars:15 }}</td>
+                            <td>
+                                <a href="{% url 'whatsapp_message_detail' msg.id %}" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="{% url 'whatsapp_chat_detail' msg.chat_id %}" class="btn btn-sm btn-outline-info">
+                                    <i class="fas fa-comments"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="9" class="text-center py-5">
+                                <i class="fab fa-whatsapp fa-4x text-muted mb-3"></i>
+                                <p class="mb-0">Nenhuma mensagem encontrada.</p>
+                                <p class="text-muted small">Tente ajustar os filtros ou aguardar a sincronização.</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Paginação -->
+            {% if messages.has_other_pages %}
+            <nav aria-label="Page navigation" class="mt-4">
+                <ul class="pagination justify-content-center flex-wrap">
+                    {% if messages.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ messages.previous_page_number }}{% if device_filter %}&device={{ device_filter }}{% endif %}{% if chat_filter %}&chat={{ chat_filter }}{% endif %}{% if direction_filter %}&direction={{ direction_filter }}{% endif %}{% if type_filter %}&type={{ type_filter }}{% endif %}{% if start_date %}&start_date={{ start_date }}{% endif %}{% if end_date %}&end_date={{ end_date }}{% endif %}{% if search %}&search={{ search }}{% endif %}">
+                            Anterior
+                        </a>
+                    </li>
+                    {% endif %}
+
+                    {% for num in messages.paginator.page_range %}
+                        {% if messages.number == num %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ num }}</span>
+                        </li>
+                        {% elif num > messages.number|add:'-3' and num < messages.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ num }}{% if device_filter %}&device={{ device_filter }}{% endif %}{% if chat_filter %}&chat={{ chat_filter }}{% endif %}{% if direction_filter %}&direction={{ direction_filter }}{% endif %}{% if type_filter %}&type={{ type_filter }}{% endif %}{% if start_date %}&start_date={{ start_date }}{% endif %}{% if end_date %}&end_date={{ end_date }}{% endif %}{% if search %}&search={{ search }}{% endif %}">
+                                {{ num }}
+                            </a>
+                        </li>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if messages.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ messages.next_page_number }}{% if device_filter %}&device={{ device_filter }}{% endif %}{% if chat_filter %}&chat={{ chat_filter }}{% endif %}{% if direction_filter %}&direction={{ direction_filter }}{% endif %}{% if type_filter %}&type={{ type_filter }}{% endif %}{% if start_date %}&start_date={{ start_date }}{% endif %}{% if end_date %}&end_date={{ end_date }}{% endif %}{% if search %}&search={{ search }}{% endif %}">
+                            Próxima
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+    // Inicializar tooltips
+    document.addEventListener('DOMContentLoaded', function() {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        })
+    })
+</script>
+{% endblock %}

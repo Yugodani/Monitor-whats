@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Conversas SMS - Monitor Empresarial{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12 d-flex justify-content-between align-items-center">
+            <h2>
+                <i class="fas fa-comments me-2"></i>
+                Conversas SMS
+            </h2>
+            <a href="{% url 'messages' %}" class="btn btn-outline-primary">
+                <i class="fas fa-arrow-left me-2"></i>Voltar para Mensagens
+            </a>
+        </div>
+    </div>
+
+    <!-- Lista de conversas -->
+    <div class="row">
+        {% for thread in threads %}
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100 {% if thread.unread_count > 0 %}border-primary{% endif %}">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0">
+                        <i class="fas fa-user-circle me-2"></i>
+                        {{ thread.contact_name }}
+                    </h6>
+                    {% if thread.unread_count > 0 %}
+                    <span class="badge bg-danger rounded-pill">{{ thread.unread_count }}</span>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    <p class="mb-1"><strong>Número:</strong> {{ thread.phone_number }}</p>
+                    <p class="mb-1"><strong>Total:</strong> {{ thread.message_count }} mensagens</p>
+                    <p class="mb-1"><strong>Última:</strong> {{ thread.last_message_date|timesince }}</p>
+                    <p class="mb-3 text-muted small">
+                        <i class="fas fa-{% if thread.last_message_direction == 'sent' %}arrow-up text-success{% else %}arrow-down text-info{% endif %} me-1"></i>
+                        {{ thread.last_message }}
+                    </p>
+
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'message_conversation' thread.phone_number %}" class="btn btn-sm btn-primary">
+                            <i class="fas fa-comments me-1"></i>Ver Conversa
+                        </a>
+                        {% if thread.unread_count > 0 %}
+                        <a href="{% url 'message_mark_thread_read' thread.phone_number %}" class="btn btn-sm btn-outline-success">
+                            <i class="fas fa-check"></i>
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="alert alert-info text-center">
+                <i class="fas fa-comments fa-3x mb-3"></i>
+                <p>Nenhuma conversa encontrada.</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Paginação -->
+    {% if threads.has_other_pages %}
+    <nav aria-label="Page navigation" class="mt-4">
+        <ul class="pagination justify-content-center">
+            {% if threads.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ threads.previous_page_number }}">Anterior</a>
+            </li>
+            {% endif %}
+
+            {% for num in threads.paginator.page_range %}
+                {% if threads.number == num %}
+                <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                {% else %}
+                <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+                {% endif %}
+            {% endfor %}
+
+            {% if threads.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ threads.next_page_number }}">Próxima</a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+{% endblock %}

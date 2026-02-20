@@ -1,0 +1,73 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="{% url 'dashboard' %}">
+            <i class="fas fa-chart-line me-2"></i>
+            Monitor Empresarial
+        </a>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}"
+                       href="{% url 'dashboard' %}">
+                        <i class="fas fa-home me-1"></i>Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'device_list' %}">
+                        <i class="fas fa-mobile-alt me-1"></i>Dispositivos
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'calls' %}">
+                        <i class="fas fa-phone me-1"></i>Ligações
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'messages' %}active{% endif %}"
+                    href="{% url 'messages' %}">  <!-- Deve corresponder ao name='messages' no urls_web.py -->
+                        <i class="fas fa-envelope me-1"></i>Mensagens
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'whatsapp' %}active{% endif %}"
+                       href="{% url 'whatsapp' %}">  <!-- Deve corresponder ao name='whatsapp' no urls_web.py -->
+                        <i class="fab fa-whatsapp me-1"></i>WhatsApp
+                    </a>
+                </li>
+            </ul>
+
+            <ul class="navbar-nav">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
+                       data-bs-toggle="dropdown">
+                        <i class="fas fa-user-circle me-1"></i>
+                        {{ user.get_full_name|default:user.email }}
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li>
+                            <a class="dropdown-item" href="{% url 'profile' %}">
+                                <i class="fas fa-user me-2"></i>Perfil
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="{% url 'settings' %}">
+                                <i class="fas fa-cog me-2"></i>Configurações
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <a class="dropdown-item text-danger" href="{% url 'logout' %}">
+                                <i class="fas fa-sign-out-alt me-2"></i>Sair
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>

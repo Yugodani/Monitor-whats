@@ -1,0 +1,175 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dispositivos - Monitor Empresarial{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12 d-flex justify-content-between align-items-center">
+            <h2>
+                <i class="fas fa-mobile-alt me-2"></i>
+                Dispositivos
+            </h2>
+            <a href="{% url 'device_add' %}" class="btn btn-primary">
+                <i class="fas fa-plus me-2"></i>Novo Dispositivo
+            </a>
+        </div>
+    </div>
+
+    <!-- Cards de estatísticas -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h6>Total</h6>
+                    <h3>{{ total_devices }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h6>Ativos</h6>
+                    <h3>{{ active_devices }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <h6>Inativos</h6>
+                    <h3>{{ inactive_devices }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card bg-danger text-white">
+                <div class="card-body">
+                    <h6>Bloqueados</h6>
+                    <h3>{{ blocked_devices }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-4">
+                    <input type="text" name="search" class="form-control"
+                           placeholder="Buscar por nome, modelo ou colaborador"
+                           value="{{ search_query }}">
+                </div>
+                <div class="col-md-3">
+                    <select name="status" class="form-select">
+                        <option value="">Todos os status</option>
+                        <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Ativo</option>
+                        <option value="inactive" {% if status_filter == 'inactive' %}selected{% endif %}>Inativo</option>
+                        <option value="blocked" {% if status_filter == 'blocked' %}selected{% endif %}>Bloqueado</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-search me-2"></i>Filtrar
+                    </button>
+                </div>
+                <div class="col-md-2">
+                    <a href="{% url 'device_list' %}" class="btn btn-outline-secondary w-100">
+                        <i class="fas fa-eraser me-2"></i>Limpar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Lista de dispositivos -->
+    <div class="row">
+        {% for device in devices %}
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0">
+                        <i class="fas fa-{{ device.os_type }} me-2"></i>
+                        {{ device.device_name }}
+                    </h6>
+                    <span class="badge bg-{% if device.status == 'active' %}success{% elif device.status == 'inactive' %}warning{% else %}danger{% endif %}">
+                        {{ device.get_status_display }}
+                    </span>
+                </div>
+                <div class="card-body">
+                    <p class="mb-1"><strong>Modelo:</strong> {{ device.device_model|default:"-" }}</p>
+                    <p class="mb-1"><strong>Colaborador:</strong> {{ device.assigned_to|default:"Não atribuído" }}</p>
+                    <p class="mb-1"><strong>Telefone:</strong> {{ device.phone_number|default:"-" }}</p>
+                    <p class="mb-1"><strong>Último sync:</strong> {{ device.last_sync|timesince }}</p>
+
+                    <div class="mt-3 d-flex justify-content-between">
+                        <a href="{% url 'device_detail' device.id %}" class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-eye me-1"></i>Detalhes
+                        </a>
+                        <div>
+                            {% if device.status == 'active' %}
+                            <a href="{% url 'device_block' device.id %}" class="btn btn-sm btn-outline-danger"
+                               onclick="return confirm('Bloquear este dispositivo?')">
+                                <i class="fas fa-ban"></i>
+                            </a>
+                            {% else %}
+                            <a href="{% url 'device_unblock' device.id %}" class="btn btn-sm btn-outline-success"
+                               onclick="return confirm('Desbloquear este dispositivo?')">
+                                <i class="fas fa-check"></i>
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="alert alert-info text-center">
+                Nenhum dispositivo encontrado.
+                <a href="{% url 'device_add' %}" class="alert-link">Adicionar dispositivo</a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Paginação -->
+    {% if devices.has_other_pages %}
+    <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center">
+            {% if devices.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ devices.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">
+                    Anterior
+                </a>
+            </li>
+            {% endif %}
+
+            {% for num in devices.paginator.page_range %}
+                {% if devices.number == num %}
+                <li class="page-item active">
+                    <span class="page-link">{{ num }}</span>
+                </li>
+                {% else %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">
+                        {{ num }}
+                    </a>
+                </li>
+                {% endif %}
+            {% endfor %}
+
+            {% if devices.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ devices.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">
+                    Próxima
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+{% endblock %}

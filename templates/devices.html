@@ -1,0 +1,292 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dispositivos - Monitor Empresarial{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12 d-flex justify-content-between align-items-center flex-wrap">
+        <h2><i class="fas fa-mobile-alt me-2"></i>Dispositivos</h2>
+        <button class="btn btn-primary mt-2 mt-sm-0" data-bs-toggle="modal" data-bs-target="#addDeviceModal">
+            <i class="fas fa-plus me-2"></i>Novo Dispositivo
+        </button>
+    </div>
+</div>
+
+<!-- Stats Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <h6>Total</h6>
+                <h3>{{ total_devices }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <h6>Ativos</h6>
+                <h3>{{ active_devices }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card bg-warning text-white">
+            <div class="card-body">
+                <h6>Inativos</h6>
+                <h3>{{ inactive_devices }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card bg-danger text-white">
+            <div class="card-body">
+                <h6>Bloqueados</h6>
+                <h3>{{ blocked_devices|default:"0" }}</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <form method="get" class="row g-3">
+                    <div class="col-12 col-md-4">
+                        <input type="text" name="search" class="form-control"
+                               placeholder="Buscar por nome, modelo ou colaborador"
+                               value="{{ request.GET.search }}">
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <select name="status" class="form-select">
+                            <option value="">Todos os status</option>
+                            <option value="active" {% if request.GET.status == 'active' %}selected{% endif %}>Ativo</option>
+                            <option value="inactive" {% if request.GET.status == 'inactive' %}selected{% endif %}>Inativo</option>
+                            <option value="blocked" {% if request.GET.status == 'blocked' %}selected{% endif %}>Bloqueado</option>
+                        </select>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-search me-2"></i>Filtrar
+                        </button>
+                    </div>
+                    <div class="col-12 col-md-2">
+                        <a href="{% url 'device_list' %}" class="btn btn-outline-secondary w-100">
+                            <i class="fas fa-eraser me-2"></i>Limpar
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Devices List -->
+<div class="row">
+    {% for device in devices %}
+    <div class="col-12 col-md-6 col-lg-4 mb-4">
+        <div class="card device-card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h6 class="mb-0">
+                    <i class="fas fa-{{ device.os_type }} me-2"></i>
+                    {{ device.device_name }}
+                </h6>
+                <span class="badge bg-{% if device.status == 'active' %}success{% elif device.status == 'inactive' %}warning{% else %}danger{% endif %}">
+                    {{ device.get_status_display }}
+                </span>
+            </div>
+            <div class="card-body">
+                <div class="device-info mb-3">
+                    <p class="mb-1"><strong>Modelo:</strong> {{ device.device_model }}</p>
+                    <p class="mb-1"><strong>Colaborador:</strong> {{ device.assigned_to|default:"Não atribuído" }}</p>
+                    <p class="mb-1"><strong>Telefone:</strong> {{ device.phone_number|default:"-" }}</p>
+                    <p class="mb-1"><strong>IMEI:</strong> {{ device.imei|default:"-" }}</p>
+                    <p class="mb-1"><strong>Último sync:</strong> {{ device.last_sync|timesince }}</p>
+                </div>
+
+                <div class="progress mb-3" style="height: 5px;">
+                    <div class="progress-bar" role="progressbar"
+                         style="width: {{ device.battery_level|default:"0" }}%"></div>
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <a href="{% url 'device_detail' device.id %}" class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-eye me-1"></i>Detalhes
+                    </a>
+                    <div>
+                        <button class="btn btn-sm btn-outline-success" onclick="syncDevice('{{ device.id }}')">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                        {% if device.status == 'active' %}
+                        <button class="btn btn-sm btn-outline-danger" onclick="blockDevice('{{ device.id }}')">
+                            <i class="fas fa-ban"></i>
+                        </button>
+                        {% else %}
+                        <button class="btn btn-sm btn-outline-success" onclick="unblockDevice('{{ device.id }}')">
+                            <i class="fas fa-check"></i>
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <div class="alert alert-info text-center">
+            Nenhum dispositivo encontrado.
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Pagination -->
+{% if devices.has_other_pages %}
+<div class="row mt-4">
+    <div class="col-12">
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center flex-wrap">
+                {% if devices.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ devices.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">
+                        Anterior
+                    </a>
+                </li>
+                {% endif %}
+
+                {% for num in devices.paginator.page_range %}
+                    {% if devices.number == num %}
+                    <li class="page-item active">
+                        <span class="page-link">{{ num }}</span>
+                    </li>
+                    {% elif num > devices.number|add:'-3' and num < devices.number|add:'3' %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ num }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">
+                            {{ num }}
+                        </a>
+                    </li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if devices.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ devices.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">
+                        Próxima
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+</div>
+{% endif %}
+
+<!-- Add Device Modal -->
+<div class="modal fade" id="addDeviceModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Adicionar Dispositivo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addDeviceForm" method="post" action="{% url 'add_device' %}">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label">ID do Dispositivo</label>
+                        <input type="text" name="device_id" class="form-control" required>
+                        <div class="form-text">ID único do dispositivo (IMEI ou identificador)</div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Nome do Dispositivo</label>
+                        <input type="text" name="device_name" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Modelo</label>
+                        <input type="text" name="device_model" class="form-control">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Fabricante</label>
+                        <input type="text" name="manufacturer" class="form-control">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Sistema Operacional</label>
+                        <select name="os_type" class="form-select">
+                            <option value="android">Android</option>
+                            <option value="ios">iOS</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Colaborador</label>
+                        <input type="text" name="assigned_to" class="form-control">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Número de Telefone</label>
+                        <input type="text" name="phone_number" class="form-control">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="submit" form="addDeviceForm" class="btn btn-primary">Adicionar</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function syncDevice(deviceId) {
+    if (confirm('Solicitar sincronização deste dispositivo?')) {
+        fetch(`/api/devices/${deviceId}/sync/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert('Sincronização solicitada com sucesso!');
+            location.reload();
+        })
+        .catch(error => {
+            alert('Erro ao solicitar sincronização');
+        });
+    }
+}
+
+function blockDevice(deviceId) {
+    if (confirm('Bloquear este dispositivo?')) {
+        fetch(`/api/devices/${deviceId}/block/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            location.reload();
+        });
+    }
+}
+
+function unblockDevice(deviceId) {
+    if (confirm('Desbloquear este dispositivo?')) {
+        fetch(`/api/devices/${deviceId}/unblock/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            location.reload();
+        });
+    }
+}
+</script>
+{% endblock %}

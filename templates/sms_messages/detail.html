@@ -1,0 +1,148 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Detalhes da Mensagem - Monitor Empresarial{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'messages' %}">Mensagens</a></li>
+                    <li class="breadcrumb-item active">Detalhes</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-envelope me-2"></i>
+                        Detalhes da Mensagem
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-borderless">
+                        <tr>
+                            <th style="width: 150px;">Data/Hora:</th>
+                            <td>{{ message.message_date|date:"d/m/Y H:i:s" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Tipo:</th>
+                            <td>
+                                <span class="badge bg-{% if message.message_type == 'sms' %}secondary{% else %}primary{% endif %}">
+                                    {{ message.get_message_type_display }}
+                                </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Direção:</th>
+                            <td>
+                                {% if message.direction == 'sent' %}
+                                <i class="fas fa-arrow-up text-success"></i> Enviada
+                                {% else %}
+                                <i class="fas fa-arrow-down text-info"></i> Recebida
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Número:</th>
+                            <td>{{ message.phone_number }}</td>
+                        </tr>
+                        <tr>
+                            <th>Contato:</th>
+                            <td>{{ message.contact_name|default:"-" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Dispositivo:</th>
+                            <td>{{ message.device.device_name }}</td>
+                        </tr>
+                        <tr>
+                            <th>Status:</th>
+                            <td>
+                                {% if message.is_read %}
+                                <span class="badge bg-success">Lida</span>
+                                {% else %}
+                                <span class="badge bg-warning">Não lida</span>
+                                {% endif %}
+
+                                {% if message.is_delivered %}
+                                <span class="badge bg-info">Entregue</span>
+                                {% endif %}
+
+                                {% if message.is_deleted %}
+                                <span class="badge bg-danger">Deletada</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% if message.mms_url %}
+                        <tr>
+                            <th>Anexo:</th>
+                            <td>
+                                <a href="{{ message.mms_url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-image me-1"></i>Ver anexo
+                                </a>
+                            </td>
+                        </tr>
+                        {% endif %}
+                    </table>
+
+                    <div class="mt-4">
+                        <h6>Conteúdo da Mensagem:</h6>
+                        <div class="p-3 bg-light rounded">
+                            {{ message.content|linebreaks }}
+                        </div>
+                    </div>
+
+                    {% if conversation %}
+                    <div class="mt-4">
+                        <h6>Outras mensagens da mesma conversa:</h6>
+                        <div class="list-group">
+                            {% for msg in conversation %}
+                            <a href="{% url 'message_detail' msg.id %}" class="list-group-item list-group-item-action">
+                                <div class="d-flex justify-content-between">
+                                    <span>
+                                        {% if msg.direction == 'sent' %}
+                                        <i class="fas fa-arrow-up text-success me-2"></i>
+                                        {% else %}
+                                        <i class="fas fa-arrow-down text-info me-2"></i>
+                                        {% endif %}
+                                        {{ msg.content|truncatechars:50 }}
+                                    </span>
+                                    <small>{{ msg.message_date|date:"d/m/Y H:i" }}</small>
+                                </div>
+                            </a>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="card-footer">
+                    <div class="d-flex justify-content-between">
+                        <a href="javascript:history.back()" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Voltar
+                        </a>
+                        <div>
+                            <a href="{% url 'message_conversation' message.phone_number %}" class="btn btn-info">
+                                <i class="fas fa-comments me-2"></i>Ver Conversa
+                            </a>
+                            {% if not message.is_read and message.direction == 'received' %}
+                            <a href="{% url 'message_mark_read' message.id %}" class="btn btn-success">
+                                <i class="fas fa-check me-2"></i>Marcar como Lida
+                            </a>
+                            {% endif %}
+                            <a href="{% url 'message_delete' message.id %}" class="btn btn-danger" onclick="return confirm('Tem certeza que deseja deletar esta mensagem?')">
+                                <i class="fas fa-trash me-2"></i>Deletar
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
