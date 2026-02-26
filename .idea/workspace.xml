@@ -4,16 +4,18 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="b837bb31-3231-43ef-a108-c8c52e09fad1" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/main" afterDir="false" />
+    <list default="true" id="b837bb31-3231-43ef-a108-c8c52e09fad1" name="Changes" comment="1.0">
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/accounts/forms.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/accounts/forms.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/empresa_monitor/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/empresa_monitor/settings.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
+  <component name="ChangesViewManager" show_ignored="true" />
   <component name="Git.Settings">
     <option name="PREVIOUS_COMMIT_AUTHORS">
       <list>
@@ -44,7 +46,8 @@
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;project.propVCSSupport.DirectoryMappings&quot;
   }
 }</component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
@@ -61,6 +64,12 @@
       <workItem from="1771814300823" duration="648000" />
       <workItem from="1771814986349" duration="371000" />
       <workItem from="1771815382866" duration="977000" />
+      <workItem from="1771820153137" duration="59000" />
+      <workItem from="1771820484839" duration="281000" />
+      <workItem from="1771858003730" duration="1271000" />
+      <workItem from="1771866869687" duration="593000" />
+      <workItem from="1771872229531" duration="812000" />
+      <workItem from="1772071614045" duration="1079000" />
     </task>
     <task id="LOCAL-00001" summary="teste">
       <created>1771561100871</created>

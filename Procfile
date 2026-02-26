@@ -1,0 +1,1 @@
+web: gunicorn empresa_monitor.wsgi

@@ -1,0 +1,55 @@
+Index: .idea/workspace.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"AutoImportSettings\">\r\n    <option name=\"autoReloadType\" value=\"SELECTIVE\" />\r\n  </component>\r\n  <component name=\"ChangeListManager\">\r\n    <list default=\"true\" id=\"b837bb31-3231-43ef-a108-c8c52e09fad1\" name=\"Changes\" comment=\"\">\r\n      <change afterPath=\"$PROJECT_DIR$/main\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/.idea/workspace.xml\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/.idea/workspace.xml\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/apps/accounts/forms.py\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/apps/accounts/forms.py\" afterDir=\"false\" />\r\n    </list>\r\n    <option name=\"SHOW_DIALOG\" value=\"false\" />\r\n    <option name=\"HIGHLIGHT_CONFLICTS\" value=\"true\" />\r\n    <option name=\"HIGHLIGHT_NON_ACTIVE_CHANGELIST\" value=\"false\" />\r\n    <option name=\"LAST_RESOLUTION\" value=\"IGNORE\" />\r\n  </component>\r\n  <component name=\"Git.Settings\">\r\n    <option name=\"PREVIOUS_COMMIT_AUTHORS\">\r\n      <list>\r\n        <option value=\"Thiago Olimpio\" />\r\n      </list>\r\n    </option>\r\n  </component>\r\n  <component name=\"HighlightingSettingsPerFile\">\r\n    <setting file=\"file://$PROJECT_DIR$/venv/Lib/site-packages/pandas/tests/extension/test_floating.py\" root0=\"SKIP_INSPECTION\" />\r\n  </component>\r\n  <component name=\"MarkdownSettingsMigration\">\r\n    <option name=\"stateVersion\" value=\"1\" />\r\n  </component>\r\n  <component name=\"ProjectId\" id=\"39umIu09SLE8QxWk7ocCs8qKEUi\" />\r\n  <component name=\"ProjectLevelVcsManager\" settingsEditedManually=\"true\" />\r\n  <component name=\"ProjectViewState\">\r\n    <option name=\"autoscrollFromSource\" value=\"false\" />\r\n    <option name=\"hideEmptyMiddlePackages\" value=\"true\" />\r\n    <option name=\"showLibraryContents\" value=\"true\" />\r\n  </component>\r\n  <component name=\"PropertiesComponent\">{\r\n  &quot;keyToString&quot;: {\r\n    &quot;ASKED_SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,\r\n    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,\r\n    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,\r\n    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,\r\n    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,\r\n    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,\r\n    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,\r\n    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,\r\n    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;\r\n  }\r\n}</component>\r\n  <component name=\"SpellCheckerSettings\" RuntimeDictionaries=\"0\" Folders=\"0\" CustomDictionaries=\"0\" DefaultDictionary=\"application-level\" UseSingleDictionary=\"true\" transferred=\"true\" />\r\n  <component name=\"TaskManager\">\r\n    <task active=\"true\" id=\"Default\" summary=\"Default task\">\r\n      <changelist id=\"b837bb31-3231-43ef-a108-c8c52e09fad1\" name=\"Changes\" comment=\"\" />\r\n      <created>1771554253649</created>\r\n      <option name=\"number\" value=\"Default\" />\r\n      <option name=\"presentableId\" value=\"Default\" />\r\n      <updated>1771554253649</updated>\r\n      <workItem from=\"1771554273111\" duration=\"4853000\" />\r\n      <workItem from=\"1771596480975\" duration=\"1234000\" />\r\n      <workItem from=\"1771597762814\" duration=\"2151000\" />\r\n      <workItem from=\"1771814300823\" duration=\"648000\" />\r\n      <workItem from=\"1771814986349\" duration=\"371000\" />\r\n      <workItem from=\"1771815382866\" duration=\"977000\" />\r\n    </task>\r\n    <task id=\"LOCAL-00001\" summary=\"teste\">\r\n      <created>1771561100871</created>\r\n      <option name=\"number\" value=\"00001\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00001\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1771561100871</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00002\" summary=\"teste\">\r\n      <created>1771562119683</created>\r\n      <option name=\"number\" value=\"00002\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00002\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1771562119684</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00003\" summary=\"teste\">\r\n      <created>1771596703598</created>\r\n      <option name=\"number\" value=\"00003\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00003\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1771596703598</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00004\" summary=\"PRIMEIRA VERSÃO\">\r\n      <created>1771597998601</created>\r\n      <option name=\"number\" value=\"00004\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00004\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1771597998601</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00005\" summary=\"PRIMEIRA VERSÃO\">\r\n      <created>1771600476400</created>\r\n      <option name=\"number\" value=\"00005\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00005\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1771600476401</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00006\" summary=\"PRIMEIRA VERSÃO\">\r\n      <created>1771601418469</created>\r\n      <option name=\"number\" value=\"00006\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00006\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1771601418469</updated>\r\n    </task>\r\n    <option name=\"localTasksCounter\" value=\"7\" />\r\n    <servers />\r\n  </component>\r\n  <component name=\"TypeScriptGeneratedFilesManager\">\r\n    <option name=\"version\" value=\"3\" />\r\n  </component>\r\n  <component name=\"Vcs.Log.Tabs.Properties\">\r\n    <option name=\"TAB_STATES\">\r\n      <map>\r\n        <entry key=\"MAIN\">\r\n          <value>\r\n            <State />\r\n          </value>\r\n        </entry>\r\n      </map>\r\n    </option>\r\n  </component>\r\n  <component name=\"VcsManagerConfiguration\">\r\n    <MESSAGE value=\"teste\" />\r\n    <MESSAGE value=\"PRIMEIRA VERSÃO\" />\r\n    <option name=\"LAST_COMMIT_MESSAGE\" value=\"PRIMEIRA VERSÃO\" />\r\n  </component>\r\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/workspace.xml b/.idea/workspace.xml
+--- a/.idea/workspace.xml	(revision 79651ba9c289f56fcb57cdbcd0b3524be7711848)
++++ b/.idea/workspace.xml	(date 1771817189409)
+@@ -5,9 +5,7 @@
+   </component>
+   <component name="ChangeListManager">
+     <list default="true" id="b837bb31-3231-43ef-a108-c8c52e09fad1" name="Changes" comment="">
+-      <change afterPath="$PROJECT_DIR$/main" afterDir="false" />
+       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/apps/accounts/forms.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/accounts/forms.py" afterDir="false" />
+     </list>
+     <option name="SHOW_DIALOG" value="false" />
+     <option name="HIGHLIGHT_CONFLICTS" value="true" />
+@@ -60,7 +58,7 @@
+       <workItem from="1771597762814" duration="2151000" />
+       <workItem from="1771814300823" duration="648000" />
+       <workItem from="1771814986349" duration="371000" />
+-      <workItem from="1771815382866" duration="977000" />
++      <workItem from="1771815382866" duration="1782000" />
+     </task>
+     <task id="LOCAL-00001" summary="teste">
+       <created>1771561100871</created>
+@@ -104,7 +102,14 @@
+       <option name="project" value="LOCAL" />
+       <updated>1771601418469</updated>
+     </task>
+-    <option name="localTasksCounter" value="7" />
++    <task id="LOCAL-00007" summary="1.0">
++      <created>1771816717002</created>
++      <option name="number" value="00007" />
++      <option name="presentableId" value="LOCAL-00007" />
++      <option name="project" value="LOCAL" />
++      <updated>1771816717002</updated>
++    </task>
++    <option name="localTasksCounter" value="8" />
+     <servers />
+   </component>
+   <component name="TypeScriptGeneratedFilesManager">
+@@ -124,6 +129,7 @@
+   <component name="VcsManagerConfiguration">
+     <MESSAGE value="teste" />
+     <MESSAGE value="PRIMEIRA VERSÃO" />
+-    <option name="LAST_COMMIT_MESSAGE" value="PRIMEIRA VERSÃO" />
++    <MESSAGE value="1.0" />
++    <option name="LAST_COMMIT_MESSAGE" value="1.0" />
+   </component>
+ </project>
+\ No newline at end of file
