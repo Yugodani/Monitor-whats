@@ -16,7 +16,14 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-your-secret-key-here-
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'false') == 'True'
 
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split(',')
+
+ALLOWED_HOSTS.extend(['localhost', '127.0.0.1', '0.0.0.0'])
+
+if 'RENDER' in os.environ:
+    ALLOWED_HOSTS.append(os.environ.get('RENDER_EXTERNAL_HOSTNAME', ''))
+    # Remover valores vazios
+    ALLOWED_HOSTS = [host for host in ALLOWED_HOSTS if host]
 
 # Application definition
 INSTALLED_APPS = [
@@ -79,28 +86,26 @@ WSGI_APPLICATION = 'empresa_monitor.wsgi.application'
 ASGI_APPLICATION = 'empresa_monitor.asgi.application'
 
 # Database
-IS_PRODUCTION = os.environ.get('RENDER', False) or os.environ.get('DATABASE_URL', False)
+DATABASE_URL = os.environ.get('DATABASE_URL')
 
-if IS_PRODUCTION:
-    # Configuração para PostgreSQL no Render
+if DATABASE_URL:
+    # Produção com PostgreSQL
     DATABASES = {
         'default': dj_database_url.config(
             conn_max_age=600,
             conn_health_checks=True,
-            ssl_require=True  # Importante para Render
+            ssl_require=True
         )
     }
-
-    # O dj_database_url já trata o sslmode corretamente
-    # Não precisamos adicionar manualmente
 else:
-    # Configuração para desenvolvimento com SQLite
+    # Desenvolvimento com SQLite
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
             'NAME': BASE_DIR / 'db.sqlite3',
         }
     }
+    print("⚠️ Usando SQLite (modo desenvolvimento)")
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [

@@ -1,1 +1,1 @@
-web: gunicorn empresa_monitor.wsgi:application
+web: gunicorn empresa_monitor.wsgi:application --log-file -
