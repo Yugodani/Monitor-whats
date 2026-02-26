@@ -3,8 +3,38 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.views.generic import RedirectView
+from django.http import JsonResponse
+
+def health_check(request):
+    """Endpoint para verificar a saúde da aplicação"""
+    import sys
+    import django
+    from django.db import connections
+    from django.db.utils import OperationalError
+
+    status = {
+        'status': 'ok',
+        'django_version': django.get_version(),
+        'python_version': sys.version,
+        'debug': settings.DEBUG,
+        'database': 'unknown',
+        'allowed_hosts': settings.ALLOWED_HOSTS,
+    }
+
+    # Test database connection
+    db_conn = connections['default']
+    try:
+        db_conn.cursor()
+        status['database'] = 'connected'
+    except OperationalError:
+        status['database'] = 'error'
+        status['status'] = 'error'
+
+    return JsonResponse(status)
+
 
 urlpatterns = [
+    path('health/', health_check),  # Adicione esta linha no início
     path('admin/', admin.site.urls),
 
     # API URLs
