@@ -12,12 +12,19 @@ from decouple import config
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get('SECRET_KEY')
-if not SECRET_KEY:
-    if os.environ.get('DEBUG', 'False') == 'True':
-        SECRET_KEY = 'django-insecure-dev-key-do-not-use-in-production'
-    else:
-        raise ValueError("SECRET_KEY environment variable not set!")
+try:
+    SECRET_KEY = config('SECRET_KEY')
+except Exception as e:
+    print(f"⚠️ decouple falhou: {e}")
+    # Fallback para os.environ
+    SECRET_KEY = os.environ.get('SECRET_KEY')
+    if not SECRET_KEY:
+        # Último recurso para desenvolvimento
+        if os.environ.get('DEBUG', 'True') == 'True':
+            SECRET_KEY = 'django-insecure-dev-key-temporary'
+            print("⚠️ Usando chave temporária para desenvolvimento!")
+        else:
+            raise ValueError("SECRET_KEY não configurada!")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'True') == 'True'
