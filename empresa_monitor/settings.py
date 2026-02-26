@@ -215,3 +215,33 @@ if not DEBUG:
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# CSRF settings
+CSRF_COOKIE_DOMAIN = '.onrender.com'  # Nota: começa com ponto
+CSRF_TRUSTED_ORIGINS = [
+    'https://monitor-whats-53jh.onrender.com',
+    'http://monitor-whats-53jh.onrender.com',
+]
+
+# CSRF e Cookie settings
+CSRF_COOKIE_SECURE = not DEBUG  # True em produção, False em desenvolvimento
+CSRF_COOKIE_HTTPONLY = False  # Necessário para JavaScript ler o cookie
+CSRF_COOKIE_SAMESITE = 'Lax'  # Ou 'Strict' para mais segurança
+CSRF_USE_SESSIONS = False  # Usar cookies em vez de sessões
+
+# Session settings
+SESSION_COOKIE_SECURE = not DEBUG
+SESSION_COOKIE_SAMESITE = 'Lax'
+
+# CORS settings (se estiver usando CORS)
+CORS_ALLOWED_ORIGINS = [
+    'https://monitor-whats-53jh.onrender.com',
+]
+CORS_ALLOW_CREDENTIALS = True
+
+# Se você tiver outros domínios, adicione também
+if DEBUG:
+    CSRF_TRUSTED_ORIGINS.extend([
+        'http://localhost:8000',
+        'http://127.0.0.1:8000',
+    ])
