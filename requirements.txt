@@ -20,5 +20,4 @@ pandas==2.0.1
 numpy==1.24.3
 gunicorn==20.1.0
 whitenoise==6.4.0
-
 django-db-multitenant
