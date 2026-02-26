@@ -79,13 +79,28 @@ WSGI_APPLICATION = 'empresa_monitor.wsgi.application'
 ASGI_APPLICATION = 'empresa_monitor.asgi.application'
 
 # Database
-DATABASES = {
-    'default': dj_database_url.config(
-        default=os.environ.get('DATABASE_URL', 'sqlite:///db.sqlite3'),
-        conn_max_age=600,
-        ssl_require=True  # Render requer SSL para conexões externas [citation:3]
-    )
-}
+IS_PRODUCTION = os.environ.get('RENDER', False) or os.environ.get('DATABASE_URL', False)
+
+if IS_PRODUCTION:
+    # Configuração para PostgreSQL no Render
+    DATABASES = {
+        'default': dj_database_url.config(
+            conn_max_age=600,
+            conn_health_checks=True,
+            ssl_require=True  # Importante para Render
+        )
+    }
+
+    # O dj_database_url já trata o sslmode corretamente
+    # Não precisamos adicionar manualmente
+else:
+    # Configuração para desenvolvimento com SQLite
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [

@@ -1,1 +1,1 @@
-web: gunicorn empresa_monitor.wsgi
+web: gunicorn empresa_monitor.wsgi:application
