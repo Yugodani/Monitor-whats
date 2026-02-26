@@ -6,6 +6,7 @@ import os
 import dj_database_url
 from pathlib import Path
 from datetime import timedelta
+from decouple import config
 
 # Build paths
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -19,7 +20,7 @@ if not SECRET_KEY:
         raise ValueError("SECRET_KEY environment variable not set!")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DEBUG', 'False') == 'True'
+DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
 # ALLOWED_HOSTS configuration
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split(',')
