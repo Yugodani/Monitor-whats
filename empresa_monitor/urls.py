@@ -12,6 +12,67 @@ import sys
 import os
 
 @csrf_exempt
+def run_all_migrations(request):
+    """
+    ENDPOINT TEMPORÁRIO - Executa TODAS as migrações pendentes
+    Acesse: /debug/migrate-all/?key=sua-chave
+    """
+    SECRET_KEY = 'Nota102030@'  # Mude para uma chave segura
+
+    # Verificar autorização
+    key = request.GET.get('key', '')
+    if key != SECRET_KEY:
+        return JsonResponse({'error': 'Não autorizado'}, status=403)
+
+    try:
+        output = io.StringIO()
+        sys.stdout = output
+
+        # Executar TODAS as migrações (incluindo as do Django)
+        call_command('migrate', verbosity=2, interactive=False)
+
+        sys.stdout = sys.__stdout__
+
+        return JsonResponse({
+            'status': 'success',
+            'message': 'Todas as migrações executadas com sucesso!',
+            'output': output.getvalue()
+        })
+    except Exception as e:
+        sys.stdout = sys.__stdout__
+        return JsonResponse({
+            'status': 'error',
+            'error': str(e)
+        }, status=500)
+
+
+def migrate_sessions(request):
+    """
+    Endpoint específico para migrar apenas a sessão
+    """
+    SECRET_KEY = 'sua-chave-secreta-aqui'
+
+    key = request.GET.get('key', '')
+    if key != SECRET_KEY:
+        return JsonResponse({'error': 'Não autorizado'}, status=403)
+
+    try:
+        output = io.StringIO()
+        sys.stdout = output
+
+        # Migrar apenas o app sessions
+        call_command('migrate', 'sessions', verbosity=2, interactive=False)
+
+        sys.stdout = sys.__stdout__
+
+        return JsonResponse({
+            'status': 'success',
+            'message': 'Migração de sessions executada!',
+            'output': output.getvalue()
+        })
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
 def reset_and_migrate(request):
     """
     ENDPOINT PERIGOSO - APAGA TODOS OS DADOS!
@@ -119,28 +180,18 @@ def run_migrations(request):
         }, status=500)
 
 
-def check_db(request):
-    """Endpoint para verificar status do banco"""
-    from django.db import connections
-    from django.db.utils import OperationalError
+def check_db_detailed(request):
+    """Endpoint detalhado para diagnóstico do banco"""
+    from django.db import connection
+    from django.db.migrations.recorder import MigrationRecorder
 
     info = {
-        'status': 'unknown',
+        'status': 'connected',
         'database_url': 'definida' if os.environ.get('DATABASE_URL') else 'NÃO DEFINIDA',
         'debug': settings.DEBUG,
     }
 
-    # Testar conexão
-    try:
-        connections['default'].cursor()
-        info['connection'] = 'OK'
-    except OperationalError as e:
-        info['connection'] = f'ERRO: {str(e)}'
-        info['status'] = 'error'
-        return JsonResponse(info)
-
-    # Listar tabelas
-    from django.db import connection
+    # Listar todas as tabelas
     with connection.cursor() as cursor:
         cursor.execute("""
             SELECT table_name 
@@ -150,17 +201,32 @@ def check_db(request):
         """)
         tables = [row[0] for row in cursor.fetchall()]
 
-        info['status'] = 'connected'
         info['tables'] = tables
         info['tables_count'] = len(tables)
-        info['has_user_table'] = 'accounts_user' in tables
 
-        # Contar usuários se a tabela existir
-        if 'accounts_user' in tables:
-            cursor.execute("SELECT COUNT(*) FROM accounts_user;")
-            info['user_count'] = cursor.fetchone()[0]
-        else:
-            info['user_count'] = 0
+        # Verificar tabelas específicas
+        critical_tables = [
+            'accounts_user',
+            'django_session',
+            'django_migrations',
+            'auth_user',
+            'auth_group',
+            'auth_permission'
+        ]
+
+        table_status = {}
+        for table in critical_tables:
+            table_status[table] = table in tables
+
+        info['critical_tables'] = table_status
+
+    # Verificar migrações aplicadas
+    try:
+        migrations = MigrationRecorder.Migration.objects.all().values('app', 'name')
+        info['migrations'] = list(migrations)
+        info['migrations_count'] = len(migrations)
+    except Exception as e:
+        info['migrations_error'] = str(e)
 
     return JsonResponse(info)
 
