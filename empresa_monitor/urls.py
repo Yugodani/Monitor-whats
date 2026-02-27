@@ -46,11 +46,12 @@ def run_all_migrations(request):
         }, status=500)
 
 
+@csrf_exempt
 def migrate_sessions(request):
     """
     Endpoint específico para migrar apenas a sessão
     """
-    SECRET_KEY = 'sua-chave-secreta-aqui'
+    SECRET_KEY = 'Nota102030@'
 
     key = request.GET.get('key', '')
     if key != SECRET_KEY:
@@ -178,6 +179,52 @@ def run_migrations(request):
             'status': 'error',
             'error': str(e)
         }, status=500)
+
+
+def check_db(request):
+    """Endpoint para verificar status do banco"""
+    from django.db import connections
+    from django.db.utils import OperationalError
+
+    info = {
+        'status': 'unknown',
+        'database_url': 'definida' if os.environ.get('DATABASE_URL') else 'NÃO DEFINIDA',
+        'debug': settings.DEBUG,
+    }
+
+    # Testar conexão
+    try:
+        connections['default'].cursor()
+        info['connection'] = 'OK'
+    except OperationalError as e:
+        info['connection'] = f'ERRO: {str(e)}'
+        info['status'] = 'error'
+        return JsonResponse(info)
+
+    # Listar tabelas
+    from django.db import connection
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT table_name 
+            FROM information_schema.tables 
+            WHERE table_schema = 'public'
+            ORDER BY table_name;
+        """)
+        tables = [row[0] for row in cursor.fetchall()]
+
+        info['status'] = 'connected'
+        info['tables'] = tables
+        info['tables_count'] = len(tables)
+        info['has_user_table'] = 'accounts_user' in tables
+
+        # Contar usuários se a tabela existir
+        if 'accounts_user' in tables:
+            cursor.execute("SELECT COUNT(*) FROM accounts_user;")
+            info['user_count'] = cursor.fetchone()[0]
+        else:
+            info['user_count'] = 0
+
+    return JsonResponse(info)
 
 
 def check_db_detailed(request):
