@@ -17,7 +17,7 @@ def reset_and_migrate(request):
     ENDPOINT PERIGOSO - APAGA TODOS OS DADOS!
     Use apenas se o migrate normal falhar
     """
-    SECRET_KEY = 'sua-chave-secreta-reset-123'
+    SECRET_KEY = 'Nota102030@'
 
     key = request.GET.get('key', '')
     if key != SECRET_KEY:
