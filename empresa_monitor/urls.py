@@ -155,10 +155,8 @@ def run_migrations(request):
     Endpoint para executar migrações via HTTP (use com MUITO cuidado!)
     """
     # Proteger com uma chave secreta para não expor
-    SECRET_KEY = 'Nota102030@'
-
-    key = request.GET.get('key', '')
-    if key != SECRET_KEY:
+    secret_key = request.GET.get('secret', '')
+    if secret_key != 'sua-chave-secreta-temporaria':
         return JsonResponse({'error': 'Não autorizado'}, status=403)
 
     try:
