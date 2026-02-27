@@ -4,37 +4,71 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.views.generic import RedirectView
 from django.http import JsonResponse
+from django.db import connection
+from django.core.management import call_command
+import io
+import sys
 
-def health_check(request):
-    """Endpoint para verificar a saúde da aplicação"""
-    import sys
-    import django
-    from django.db import connections
-    from django.db.utils import OperationalError
 
-    status = {
-        'status': 'ok',
-        'django_version': django.get_version(),
-        'python_version': sys.version,
-        'debug': settings.DEBUG,
-        'database': 'unknown',
-        'allowed_hosts': settings.ALLOWED_HOSTS,
-    }
+def run_migrations(request):
+    """
+    Endpoint para executar migrações via HTTP (use com MUITO cuidado!)
+    """
+    # Proteger com uma chave secreta para não expor
+    secret_key = request.GET.get('secret', '')
+    if secret_key != 'sua-chave-secreta-temporaria':
+        return JsonResponse({'error': 'Não autorizado'}, status=403)
 
-    # Test database connection
-    db_conn = connections['default']
     try:
-        db_conn.cursor()
-        status['database'] = 'connected'
-    except OperationalError:
-        status['database'] = 'error'
-        status['status'] = 'error'
+        # Capturar output das migrações
+        output = io.StringIO()
+        sys.stdout = output
 
-    return JsonResponse(status)
+        # Executar migrações
+        call_command('migrate', verbosity=2, interactive=False)
+
+        # Restaurar stdout
+        sys.stdout = sys.__stdout__
+
+        return JsonResponse({
+            'status': 'success',
+            'output': output.getvalue()
+        })
+    except Exception as e:
+        return JsonResponse({
+            'status': 'error',
+            'error': str(e)
+        }, status=500)
+
+
+def check_db(request):
+    """Endpoint para verificar status do banco"""
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT table_name 
+                FROM information_schema.tables 
+                WHERE table_schema = 'public'
+                ORDER BY table_name;
+            """)
+            tables = [row[0] for row in cursor.fetchall()]
+
+            return JsonResponse({
+                'status': 'connected',
+                'tables': tables,
+                'has_user_table': 'accounts_user' in tables
+            })
+    except Exception as e:
+        return JsonResponse({
+            'status': 'error',
+            'error': str(e)
+        })
 
 
 urlpatterns = [
-    path('health/', health_check),  # Adicione esta linha no início
+    path('admin/', admin.site.urls),
+    path('debug/run-migrations/', run_migrations),
+    path('debug/check-db/', check_db),
     path('admin/', admin.site.urls),
 
     # API URLs

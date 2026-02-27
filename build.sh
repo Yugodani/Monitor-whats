@@ -23,8 +23,15 @@ print(f'DATABASE ENGINE: {settings.DATABASES[\"default\"][\"ENGINE\"]}')
 print(f'ALLOWED_HOSTS: {settings.ALLOWED_HOSTS}')
 "
 
+# 🔴 IMPORTANTE: Forçar migrações em ordem específica
 echo "🔄 Aplicando migrações..."
-python manage.py migrate --no-input
+python manage.py migrate accounts --no-input
+python manage.py migrate devices --no-input
+python manage.py migrate calls --no-input
+python manage.py migrate sms_messages --no-input
+python manage.py migrate whatsapp --no-input
+python manage.py migrate mobile_api --no-input
+python manage.py migrate --no-input  # Aplica o restante
 
 echo "🔍 Verificando sistema..."
 python manage.py check --deploy
