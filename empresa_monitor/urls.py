@@ -278,11 +278,11 @@ def check_db_detailed(request):
     return JsonResponse(info)
 
 urlpatterns = [
-    path('debug/force-migrate/', run_migrations_now),
-    path('debug/check-db/', check_db_detailed),
-    path('debug/migrate-all/', run_all_migrations),# que você já tem
-    path('admin/', admin.site.urls),
-    path('debug/run-migrations/', run_migrations),
+    # path('debug/force-migrate/', run_migrations_now),
+    # path('debug/check-db/', check_db_detailed),
+    # path('debug/migrate-all/', run_all_migrations),# que você já tem
+    # path('admin/', admin.site.urls),
+    # path('debug/run-migrations/', run_migrations),
     path('admin/', admin.site.urls),
 
     # API URLs
