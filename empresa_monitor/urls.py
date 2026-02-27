@@ -279,7 +279,7 @@ def check_db_detailed(request):
 
 urlpatterns = [
     path('debug/force-migrate/', run_migrations_now),
-    path('debug/check-db/', check_db),  # que você já tem
+    path('debug/check-db/', check_db_detailed),  # que você já tem
     path('admin/', admin.site.urls),
     path('debug/run-migrations/', run_migrations),
     path('admin/', admin.site.urls),
