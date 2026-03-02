@@ -11,6 +11,8 @@ from django.utils import timezone
 from django.http import HttpResponse
 from datetime import datetime, timedelta
 import csv
+import logging
+logger = logging.getLogger(__name__)
 
 from .models import SMSMessage
 from apps.devices.models import Device
@@ -19,10 +21,16 @@ from apps.devices.models import Device
 def message_list(request):
     """Lista todas as mensagens do usuário"""
     user = request.user
-    messages = SMSMessage.objects.filter(
-        device__user=user,
-        is_deleted=False
-    ).select_related('device').order_by('-message_date')
+
+    messages = SMSMessage.objects.filter(device__user=user)
+
+    # Filtro para incluir/excluir mensagens deletadas
+    include_deleted = request.GET.get('include_deleted', 'false').lower() == 'true'
+    if not include_deleted:
+        messages = messages.filter(is_deleted=False)
+
+    # Log para debug
+    print(f"Total: {messages.count()}, Incluir deletadas: {include_deleted}")
 
     # Filtros
     device_id = request.GET.get('device')
