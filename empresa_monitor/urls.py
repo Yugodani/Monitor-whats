@@ -7,6 +7,7 @@ from django.http import JsonResponse
 from django.db import connection
 from django.core.management import call_command
 from django.views.decorators.csrf import csrf_exempt
+from rest_framework_simplejwt.views import TokenObtainPairView
 import io
 import sys
 import os
@@ -286,6 +287,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
 
     # API URLs
+    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/auth/', include('apps.accounts.urls')),
     path('api/devices/', include('apps.devices.urls')),
     path('api/calls/', include('apps.calls.urls')),
