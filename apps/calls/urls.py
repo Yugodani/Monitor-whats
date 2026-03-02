@@ -13,4 +13,5 @@ urlpatterns = [
     path('calls/delete-bulk/', views.delete_calls_bulk, name='delete_calls_bulk'),
     path('calls/timeline/', views.call_timeline, name='call_timeline'),
     path('calls/summary/', views.call_summary, name='call_summary'),
+
 ]
