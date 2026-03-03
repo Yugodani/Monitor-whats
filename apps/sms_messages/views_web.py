@@ -18,35 +18,6 @@ from .models import SMSMessage
 from apps.devices.models import Device
 
 
-@login_required
-def message_list(request):
-    user = request.user
-
-    # Buscar mensagens
-    messages = SMSMessage.objects.filter(
-        device__user=user,
-        is_deleted=False
-    ).select_related('device').order_by('-message_date')[:50]
-
-    # 🔍 DIAGNÓSTICO - Isso vai aparecer no console/log do Render
-    print("=" * 50)
-    print(f"🔍 DEBUG - Total de mensagens: {messages.count()}")
-    for msg in messages:
-        print(f"  - ID: {msg.id}, Número: {msg.phone_number}, Data: {msg.message_date}")
-    print("=" * 50)
-
-    # Verificar se as mensagens têm os campos esperados
-    if messages.exists():
-        primeira = messages.first()
-        print(f"📊 Campos disponíveis: {dir(primeira)}")
-
-    context = {
-        'messages': messages,  # ← NOME CORRETO
-        'total_messages': messages.count(),
-        # ... outros campos
-    }
-
-    return render(request, 'sms_messages/list.html', context)
 
 @login_required
 def message_threads(request):
