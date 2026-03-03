@@ -18,60 +18,32 @@ from .models import SMSMessage
 from apps.devices.models import Device
 
 @login_required
+@login_required
 def message_list(request):
-    """Lista todas as mensagens do usuário"""
     user = request.user
 
-    messages = SMSMessage.objects.filter(device__user=user)
+    # Buscar mensagens
+    messages = SMSMessage.objects.filter(
+        device__user=user,
+        is_deleted=False
+    ).select_related('device').order_by('-message_date')[:50]
 
-    # Filtro para incluir/excluir mensagens deletadas
-    include_deleted = request.GET.get('include_deleted', 'false').lower() == 'true'
-    if not include_deleted:
-        messages = messages.filter(is_deleted=False)
+    # 🔍 DIAGNÓSTICO - Isso vai aparecer no console/log do Render
+    print("=" * 50)
+    print(f"🔍 DEBUG - Total de mensagens: {messages.count()}")
+    for msg in messages:
+        print(f"  - ID: {msg.id}, Número: {msg.phone_number}, Data: {msg.message_date}")
+    print("=" * 50)
 
-    # Log para debug
-    print(f"Total: {messages.count()}, Incluir deletadas: {include_deleted}")
-
-    # Filtros
-    device_id = request.GET.get('device')
-    direction = request.GET.get('direction')
-    search = request.GET.get('search')
-
-    if device_id:
-        messages = messages.filter(device_id=device_id)
-
-    if direction:
-        messages = messages.filter(direction=direction)
-
-    if search:
-        messages = messages.filter(
-            Q(phone_number__icontains=search) |
-            Q(contact_name__icontains=search) |
-            Q(content__icontains=search)
-        )
-
-    # Estatísticas
-    total = messages.count()
-    sent = messages.filter(direction='sent').count()
-    received = messages.filter(direction='received').count()
-
-    # Paginação
-    paginator = Paginator(messages, 50)
-    page = request.GET.get('page')
-    messages_page = paginator.get_page(page)
-
-    # Dispositivos para filtro
-    devices = Device.objects.filter(user=user)
+    # Verificar se as mensagens têm os campos esperados
+    if messages.exists():
+        primeira = messages.first()
+        print(f"📊 Campos disponíveis: {dir(primeira)}")
 
     context = {
-        'messages': messages_page,
-        'devices': devices,
-        'total_messages': total,
-        'sent_count': sent,
-        'received_count': received,
-        'device_filter': device_id,
-        'direction_filter': direction,
-        'search': search,
+        'messages': messages,  # ← NOME CORRETO
+        'total_messages': messages.count(),
+        # ... outros campos
     }
 
     return render(request, 'sms_messages/list.html', context)
