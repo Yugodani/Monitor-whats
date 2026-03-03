@@ -17,33 +17,32 @@ logger = logging.getLogger(__name__)
 from .models import SMSMessage
 from apps.devices.models import Device
 
-@login_required
+
 @login_required
 def message_list(request):
     user = request.user
 
-    # Buscar mensagens
+    # Busca as mensagens
     messages = SMSMessage.objects.filter(
         device__user=user,
         is_deleted=False
-    ).select_related('device').order_by('-message_date')[:50]
+    ).select_related('device').order_by('-message_date')
 
-    # 🔍 DIAGNÓSTICO - Isso vai aparecer no console/log do Render
-    print("=" * 50)
-    print(f"🔍 DEBUG - Total de mensagens: {messages.count()}")
-    for msg in messages:
-        print(f"  - ID: {msg.id}, Número: {msg.phone_number}, Data: {msg.message_date}")
-    print("=" * 50)
+    # Paginação (opcional)
+    paginator = Paginator(messages, 50)
+    page = request.GET.get('page')
+    messages_page = paginator.get_page(page)
 
-    # Verificar se as mensagens têm os campos esperados
-    if messages.exists():
-        primeira = messages.first()
-        print(f"📊 Campos disponíveis: {dir(primeira)}")
+    # Estatísticas
+    total_messages = messages.count()
+    sent_count = messages.filter(direction='sent').count()
+    received_count = messages.filter(direction='received').count()
 
     context = {
-        'messages': messages,  # ← NOME CORRETO
-        'total_messages': messages.count(),
-        # ... outros campos
+        'messages': messages_page,  # ← TEM QUE SER 'messages' (plural)
+        'total_messages': total_messages,
+        'sent_count': sent_count,
+        'received_count': received_count,
     }
 
     return render(request, 'sms_messages/list.html', context)

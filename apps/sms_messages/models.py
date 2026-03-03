@@ -27,6 +27,9 @@ class SMSMessage(models.Model):
     is_read = models.BooleanField(default=False)
     is_deleted = models.BooleanField(default=False)
 
+    def __str__(self):
+        return f"{self.phone_number} - {self.message_date}"
+
     class Meta:
         db_table = 'sms_messages'
         ordering = ['-message_date']
