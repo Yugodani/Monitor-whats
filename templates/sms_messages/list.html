@@ -31,7 +31,7 @@
             <div class="card bg-primary text-white">
                 <div class="card-body">
                     <h6>Total</h6>
-                    <h3>{{ total_messages }}</h3>
+                    <h3>{{ total_messages|default:"0" }}</h3>
                 </div>
             </div>
         </div>
@@ -39,7 +39,7 @@
             <div class="card bg-success text-white">
                 <div class="card-body">
                     <h6>Enviadas</h6>
-                    <h3>{{ sent_count }}</h3>
+                    <h3>{{ sent_count|default:"0" }}</h3>
                 </div>
             </div>
         </div>
@@ -47,7 +47,7 @@
             <div class="card bg-info text-white">
                 <div class="card-body">
                     <h6>Recebidas</h6>
-                    <h3>{{ received_count }}</h3>
+                    <h3>{{ received_count|default:"0" }}</h3>
                 </div>
             </div>
         </div>
@@ -55,7 +55,7 @@
             <div class="card bg-warning text-white">
                 <div class="card-body">
                     <h6>SMS/MMS</h6>
-                    <h3>{{ sms_count }}/{{ mms_count }}</h3>
+                    <h3>{{ sms_count|default:"0" }}/{{ mms_count|default:"0" }}</h3>
                 </div>
             </div>
         </div>
@@ -162,7 +162,14 @@
                                 </a>
                             </td>
                         </tr>
-
+                        {% empty %}
+                        <tr>
+                            <td colspan="9" class="text-center py-4">
+                                <i class="fas fa-envelope-open fa-3x text-muted mb-3"></i>
+                                <p class="mb-0">Nenhuma mensagem encontrada.</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
                     </tbody>
                 </table>
             </div>
@@ -208,12 +215,13 @@
 </div>
 
 <script>
-    // Inicializar tooltips
-    document.addEventListener('DOMContentLoaded', function() {
-        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-            return new bootstrap.Tooltip(tooltipTriggerEl)
-        })
+// Inicializar tooltips
+document.addEventListener('DOMContentLoaded', function() {
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl)
     })
+})
 </script>
-{% endblock %}
+
+{% endblock %}  <!-- Esta linha 219 deve estar correta agora -->
