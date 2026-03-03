@@ -53,7 +53,7 @@ def message_threads(request):
     user = request.user
     messages = SMSMessage.objects.filter(device__user=user, is_deleted=False)
 
-    threads = messages.values('contact_name').annotate(
+    threads = messages.values('phone_number', 'contact_name').annotate(
         last_message_date=Max('message_date'),
         message_count=Count('id'),
         unread_count=Count('id', filter=Q(is_read=False, direction='received'))
