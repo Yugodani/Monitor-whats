@@ -1,47 +1,83 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Mensagens SMS - Teste{% endblock %}
+{% block title %}Mensagens SMS - Monitor Empresarial{% endblock %}
 
 {% block content %}
 <div class="container-fluid">
-    <h2>🔍 TESTE - Mensagens SMS</h2>
-
-    <div class="alert alert-info">
-        Total de mensagens no contexto: <strong>{{ messages|length }}</strong>
+    <div class="row mb-4">
+        <div class="col-12 d-flex justify-content-between align-items-center">
+            <h2>
+                <i class="fas fa-envelope me-2"></i>
+                Mensagens SMS
+            </h2>
+            <div>
+                <a href="{% url 'message_threads' %}" class="btn btn-info me-2">
+                    <i class="fas fa-comments me-2"></i>Conversas
+                </a>
+                <a href="{% url 'message_statistics' %}" class="btn btn-primary me-2">
+                    <i class="fas fa-chart-bar me-2"></i>Estatísticas
+                </a>
+                <a href="{% url 'message_export' %}" class="btn btn-success">
+                    <i class="fas fa-download me-2"></i>Exportar
+                </a>
+            </div>
+        </div>
     </div>
 
-    {% if messages %}
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Número</th>
-                    <th>Data</th>
-                    <th>Conteúdo</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for msg in messages %}
-                <tr>
-                    <td>{{ msg.id|default:"-" }}</td>
-                    <td>{{ msg.phone_number|default:"-" }}</td>
-                    <td>{{ msg.message_date|date:"d/m/Y H:i"|default:"-" }}</td>
-                    <td>{{ msg.content|truncatechars:30|default:"-" }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    {% else %}
-        <div class="alert alert-warning">
-            Nenhuma mensagem encontrada no contexto.
-        </div>
-    {% endif %}
+    <!-- DIAGNÓSTICO - REMOVA DEPOIS -->
+    <div class="alert alert-info">
+        <strong>Diagnóstico:</strong> {{ messages|length }} mensagens carregadas
+    </div>
 
-    <hr>
-    <h4>🔧 Diagnóstico</h4>
-    <pre>
-    Variáveis no contexto: {{ messages|length }} mensagens
-    </pre>
+    <!-- Lista de mensagens -->
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Data/Hora</th>
+                            <th>Número</th>
+                            <th>Contato</th>
+                            <th>Mensagem</th>
+                            <th>Direção</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for msg in messages %}
+                        <tr>
+                            <td>{{ msg.message_date|date:"d/m/Y H:i" }}</td>
+                            <td>{{ msg.phone_number }}</td>
+                            <td>{{ msg.contact_name|default:"-" }}</td>
+                            <td>{{ msg.content|truncatechars:50 }}</td>
+                            <td>
+                                {% if msg.direction == 'sent' %}
+                                    <span class="badge bg-success">Enviada</span>
+                                {% else %}
+                                    <span class="badge bg-info">Recebida</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if msg.is_read %}
+                                    <span class="badge bg-secondary">Lida</span>
+                                {% else %}
+                                    <span class="badge bg-warning">Não lida</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center py-4">
+                                Nenhuma mensagem encontrada.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}
