@@ -6,55 +6,14 @@
 {% block content %}
 <div class="container-fluid">
     <div class="row mb-4">
-        <div class="col-12 d-flex justify-content-between align-items-center flex-wrap">
+        <div class="col-12 d-flex justify-content-between align-items-center">
             <h2>
-                <i class="fas fa-phone me-2 text-primary"></i>
+                <i class="fas fa-phone me-2"></i>
                 Ligações
             </h2>
-            <div class="mt-2 mt-sm-0">
-                <a href="{% url 'call_statistics' %}" class="btn btn-info me-2">
-                    <i class="fas fa-chart-bar me-2"></i>Estatísticas
-                </a>
-                <a href="{% url 'call_export' %}" class="btn btn-success">
-                    <i class="fas fa-download me-2"></i>Exportar
-                </a>
-            </div>
-        </div>
-    </div>
-
-    <!-- Cards de estatísticas -->
-    <div class="row g-3 mb-4">
-        <div class="col-6 col-md-3">
-            <div class="card bg-primary text-white">
-                <div class="card-body">
-                    <h6>Total</h6>
-                    <h3>{{ total_calls }}</h3>
-                </div>
-            </div>
-        </div>
-        <div class="col-6 col-md-3">
-            <div class="card bg-success text-white">
-                <div class="card-body">
-                    <h6>Recebidas</h6>
-                    <h3>{{ incoming_count }}</h3>
-                </div>
-            </div>
-        </div>
-        <div class="col-6 col-md-3">
-            <div class="card bg-info text-white">
-                <div class="card-body">
-                    <h6>Realizadas</h6>
-                    <h3>{{ outgoing_count }}</h3>
-                </div>
-            </div>
-        </div>
-        <div class="col-6 col-md-3">
-            <div class="card bg-danger text-white">
-                <div class="card-body">
-                    <h6>Perdidas</h6>
-                    <h3>{{ missed_count }}</h3>
-                </div>
-            </div>
+            <a href="{% url 'call_statistics' %}" class="btn btn-primary">
+                <i class="fas fa-chart-bar me-2"></i>Estatísticas
+            </a>
         </div>
     </div>
 
@@ -72,8 +31,7 @@
                         {% endfor %}
                     </select>
                 </div>
-
-                <div class="col-md-2">
+                <div class="col-md-3">
                     <select name="type" class="form-select">
                         <option value="">Todos os tipos</option>
                         <option value="incoming" {% if type_filter == 'incoming' %}selected{% endif %}>Recebida</option>
@@ -81,22 +39,11 @@
                         <option value="missed" {% if type_filter == 'missed' %}selected{% endif %}>Perdida</option>
                     </select>
                 </div>
-
-                <div class="col-md-2">
-                    <input type="date" name="start_date" class="form-control" value="{{ start_date }}" placeholder="Data inicial">
+                <div class="col-md-4">
+                    <input type="text" name="search" class="form-control" placeholder="Buscar número/contato" value="{{ search }}">
                 </div>
-
                 <div class="col-md-2">
-                    <input type="date" name="end_date" class="form-control" value="{{ end_date }}" placeholder="Data final">
-                </div>
-
-                <div class="col-md-3">
-                    <div class="input-group">
-                        <input type="text" name="search" class="form-control" placeholder="Buscar número/contato" value="{{ search }}">
-                        <button class="btn btn-primary" type="submit">
-                            <i class="fas fa-search"></i>
-                        </button>
-                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Filtrar</button>
                 </div>
             </form>
         </div>
@@ -105,64 +52,52 @@
     <!-- Tabela de ligações -->
     <div class="card">
         <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th>Data/Hora</th>
-                            <th>Tipo</th>
-                            <th>Número</th>
-                            <th>Contato</th>
-                            <th>Duração</th>
-                            <th>Dispositivo</th>
-                            <th>Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for call in calls %}
-                        <tr>
-                            <td>{{ call.call_date|date:"d/m/Y H:i" }}</td>
-                            <td>
-                                {% if call.call_type == 'incoming' %}
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Data/Hora</th>
+                        <th>Tipo</th>
+                        <th>Número</th>
+                        <th>Contato</th>
+                        <th>Duração</th>
+                        <th>Dispositivo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for call in calls %}
+                    <tr>
+                        <td>{{ call.call_date|date:"d/m/Y H:i" }}</td>
+                        <td>
+                            {% if call.call_type == 'incoming' %}
                                 <span class="badge bg-success">Recebida</span>
-                                {% elif call.call_type == 'outgoing' %}
+                            {% elif call.call_type == 'outgoing' %}
                                 <span class="badge bg-info">Realizada</span>
-                                {% else %}
+                            {% else %}
                                 <span class="badge bg-danger">Perdida</span>
-                                {% endif %}
-                            </td>
-                            <td>{{ call.phone_number }}</td>
-                            <td>{{ call.contact_name|default:"-" }}</td>
-                            <td>{{ call.duration }}s</td>
-                            <td>{{ call.device.device_name }}</td>
-                            <td>
-                                <a href="{% url 'call_detail' call.id %}" class="btn btn-sm btn-outline-primary">
-                                    <i class="fas fa-eye"></i>
-                                </a>
-                                <a href="{% url 'call_by_number' call.phone_number %}" class="btn btn-sm btn-outline-info">
-                                    <i class="fas fa-list"></i>
-                                </a>
-                            </td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="7" class="text-center py-4">
-                                <i class="fas fa-phone fa-3x text-muted mb-3"></i>
-                                <p class="mb-0">Nenhuma ligação encontrada.</p>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+                            {% endif %}
+                        </td>
+                        <td>{{ call.phone_number }}</td>
+                        <td>{{ call.contact_name|default:"-" }}</td>
+                        <td>{{ call.duration }}s</td>
+                        <td>{{ call.device.device_name }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center">
+                            Nenhuma ligação encontrada.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
 
             <!-- Paginação -->
             {% if calls.has_other_pages %}
-            <nav aria-label="Page navigation" class="mt-4">
-                <ul class="pagination justify-content-center flex-wrap">
+            <nav>
+                <ul class="pagination">
                     {% if calls.has_previous %}
                     <li class="page-item">
-                        <a class="page-link" href="?page={{ calls.previous_page_number }}{% if device_filter %}&device={{ device_filter }}{% endif %}{% if type_filter %}&type={{ type_filter }}{% endif %}{% if start_date %}&start_date={{ start_date }}{% endif %}{% if end_date %}&end_date={{ end_date }}{% endif %}{% if search %}&search={{ search }}{% endif %}">
+                        <a class="page-link" href="?page={{ calls.previous_page_number }}{% if device_filter %}&device={{ device_filter }}{% endif %}{% if type_filter %}&type={{ type_filter }}{% endif %}{% if search %}&search={{ search }}{% endif %}">
                             Anterior
                         </a>
                     </li>
@@ -170,12 +105,10 @@
 
                     {% for num in calls.paginator.page_range %}
                         {% if calls.number == num %}
-                        <li class="page-item active">
-                            <span class="page-link">{{ num }}</span>
-                        </li>
-                        {% elif num > calls.number|add:'-3' and num < calls.number|add:'3' %}
+                        <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                        {% else %}
                         <li class="page-item">
-                            <a class="page-link" href="?page={{ num }}{% if device_filter %}&device={{ device_filter }}{% endif %}{% if type_filter %}&type={{ type_filter }}{% endif %}{% if start_date %}&start_date={{ start_date }}{% endif %}{% if end_date %}&end_date={{ end_date }}{% endif %}{% if search %}&search={{ search }}{% endif %}">
+                            <a class="page-link" href="?page={{ num }}{% if device_filter %}&device={{ device_filter }}{% endif %}{% if type_filter %}&type={{ type_filter }}{% endif %}{% if search %}&search={{ search }}{% endif %}">
                                 {{ num }}
                             </a>
                         </li>
@@ -184,7 +117,7 @@
 
                     {% if calls.has_next %}
                     <li class="page-item">
-                        <a class="page-link" href="?page={{ calls.next_page_number }}{% if device_filter %}&device={{ device_filter }}{% endif %}{% if type_filter %}&type={{ type_filter }}{% endif %}{% if start_date %}&start_date={{ start_date }}{% endif %}{% if end_date %}&end_date={{ end_date }}{% endif %}{% if search %}&search={{ search }}{% endif %}">
+                        <a class="page-link" href="?page={{ calls.next_page_number }}{% if device_filter %}&device={{ device_filter }}{% endif %}{% if type_filter %}&type={{ type_filter }}{% endif %}{% if search %}&search={{ search }}{% endif %}">
                             Próxima
                         </a>
                     </li>

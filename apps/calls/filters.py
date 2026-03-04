@@ -36,8 +36,7 @@ class CallFilter(filters.FilterSet):
 
     class Meta:
         model = Call
-        fields = {
-            'sim_slot': ['exact'],
-            'imei': ['exact', 'icontains'],
-            'location': ['icontains'],
-        }
+        # Remova os campos que não existem no modelo
+        fields = []  # Vazio porque já definimos todos acima
+        # OU se quiser usar o fields, use apenas os que existem:
+        # fields = ['call_type', 'is_deleted']
