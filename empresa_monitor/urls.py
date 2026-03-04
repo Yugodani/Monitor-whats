@@ -286,8 +286,8 @@ def create_admin(request):
     if request.method == 'POST':
         User = get_user_model()
         username = request.POST.get('username', 'admin')
-        email = request.POST.get('email', 'admin@exemplo.com')
-        password = request.POST.get('password', 'admin123')
+        email = request.POST.get('email', 'thiago.olimpio.oliveira@gmail.com')
+        password = request.POST.get('password', 'Nota102030@')
         company = request.POST.get('company', 'Admin')
 
         if not User.objects.filter(username=username).exists():
