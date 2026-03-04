@@ -8,10 +8,16 @@ from apps.devices.models import Device
 
 @login_required
 def call_list(request):
-    """Lista todas as ligações do usuário"""
     user = request.user
-    calls = Call.objects.filter(device__user=user).select_related('device').order_by('-call_date')
+    print(f"🔍 Usuário: {user.email}")
 
+    calls = Call.objects.filter(device__user=user).select_related('device')
+    print(f"🔍 Total de ligações: {calls.count()}")
+
+    for call in calls[:5]:  # Mostra as 5 primeiras
+        print(f"  - {call.phone_number} - {call.call_date}")
+
+    calls = calls.order_by('-call_date')
     # Filtros
     device_id = request.GET.get('device')
     call_type = request.GET.get('type')

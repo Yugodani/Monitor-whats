@@ -18,6 +18,9 @@ from .models import Call
 from .serializers import CallSerializer
 from .filters import CallFilter
 from apps.devices.models import Device
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class CallViewSet(viewsets.ModelViewSet):
@@ -134,6 +137,22 @@ def bulk_sync_calls(request):
     """
     Sincroniza múltiplas ligações de um dispositivo.
     """
+    print("=" * 50)
+    print(f"🔵 REQUISIÇÃO RECEBIDA - bulk_sync_calls")
+    print(f"Usuário: {request.user}")
+    print(f"Device ID: {request.data.get('device_id')}")
+    print(f"Total de ligações: {len(request.data.get('calls', []))}")
+
+    # Mostrar a primeira ligação como exemplo
+    calls_data = request.data.get('calls', [])
+    if calls_data:
+        print(f"Primeira ligação: {calls_data[0]}")
+
+    # ... resto do código
+
+    print("✅ Ligação processada com sucesso!")
+    print("=" * 50)
+
     device_id = request.data.get('device_id')
     calls_data = request.data.get('calls', [])
 
