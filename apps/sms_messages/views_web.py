@@ -87,24 +87,103 @@ def message_conversation(request, phone_number):
     messages.filter(direction='received', is_read=False).update(is_read=True)
 
     context = {
-        'messages': messages,
+        'sms_messages': messages,
         'phone_number': phone_number,
     }
 
     return render(request, 'sms_messages/conversation.html', context)
 
+
 @login_required
 def message_statistics(request):
-    """Estatísticas de mensagens"""
+    """
+    Estatísticas detalhadas de mensagens
+    """
     user = request.user
     messages = SMSMessage.objects.filter(device__user=user)
 
+    # Períodos para análise
+    today = timezone.now().date()
+    week_ago = today - timedelta(days=7)
+    month_ago = today - timedelta(days=30)
+
+    # Estatísticas por período
+    periods = {}
+
+    for period_name, start_date in [
+        ('today', today),
+        ('week', week_ago),
+        ('month', month_ago),
+        ('all', None)
+    ]:
+        period_messages = messages
+        if start_date:
+            period_messages = messages.filter(message_date__date__gte=start_date)
+
+        periods[period_name] = {
+            'total': period_messages.count(),
+            'sent': period_messages.filter(direction='sent').count(),
+            'received': period_messages.filter(direction='received').count(),
+            'sms': period_messages.filter(message_type='sms').count(),
+            'mms': period_messages.filter(message_type='mms').count(),
+            'deleted': period_messages.filter(is_deleted=True).count(),
+            'unread': period_messages.filter(is_read=False, direction='received').count(),
+        }
+
+    # Estatísticas por dispositivo
+    devices = Device.objects.filter(user=user)
+    device_stats = []
+
+    for device in devices:
+        device_messages = messages.filter(device=device)
+        device_stats.append({
+            'device': device,
+            'total': device_messages.count(),
+            'sent': device_messages.filter(direction='sent').count(),
+            'received': device_messages.filter(direction='received').count(),
+            'last_message': device_messages.order_by(
+                '-message_date').first().message_date if device_messages.exists() else None,
+        })
+
+    # Top 10 contatos
+    top_contacts = messages.values(
+        'phone_number', 'contact_name'
+    ).annotate(
+        total=Count('id'),
+        last_message=Max('message_date')
+    ).order_by('-total')[:10]
+
+    # Dados para gráfico dos últimos 30 dias
+    from django.db.models.functions import TruncDate
+
+    last_30_days = timezone.now() - timedelta(days=30)
+    daily_stats = messages.filter(
+        message_date__gte=last_30_days
+    ).annotate(
+        date=TruncDate('message_date')
+    ).values('date').annotate(
+        total=Count('id'),
+        sent=Count('id', filter=Q(direction='sent')),
+        received=Count('id', filter=Q(direction='received'))
+    ).order_by('date')
+
+    # Preparar dados para o gráfico
+    chart_labels = []
+    chart_sent = []
+    chart_received = []
+
+    for day in daily_stats:
+        chart_labels.append(day['date'].strftime('%d/%m'))
+        chart_sent.append(day['sent'])
+        chart_received.append(day['received'])
+
     context = {
-        'total': messages.count(),
-        'sent': messages.filter(direction='sent').count(),
-        'received': messages.filter(direction='received').count(),
-        'deleted': messages.filter(is_deleted=True).count(),
-        'unread': messages.filter(is_read=False, direction='received').count(),
+        'periods': periods,
+        'device_stats': device_stats,
+        'top_contacts': top_contacts,
+        'chart_labels': chart_labels,
+        'chart_sent': chart_sent,
+        'chart_received': chart_received,
     }
 
     return render(request, 'sms_messages/statistics.html', context)

@@ -8,7 +8,7 @@
     <div class="row mb-4">
         <div class="col-12 d-flex justify-content-between align-items-center">
             <h2>
-                <i class="fas fa-chart-bar me-2"></i>
+                <i class="fas fa-chart-bar me-2 text-primary"></i>
                 Estatísticas de Mensagens SMS
             </h2>
             <a href="{% url 'messages' %}" class="btn btn-outline-primary">
@@ -82,21 +82,21 @@
         </div>
     </div>
 
-    <!-- Top contatos -->
+    <!-- Top contatos e estatísticas por dispositivo -->
     <div class="row">
         <div class="col-md-6 mb-4">
             <div class="card h-100">
-                <div class="card-header">
-                    <h5 class="mb-0">Top Contatos</h5>
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Top 10 Contatos</h5>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
-                        <table class="table">
+                        <table class="table table-hover">
                             <thead>
                                 <tr>
                                     <th>Contato</th>
                                     <th>Número</th>
-                                    <th>Total</th>
+                                    <th>Mensagens</th>
                                     <th>Última</th>
                                 </tr>
                             </thead>
@@ -120,15 +120,14 @@
             </div>
         </div>
 
-        <!-- Estatísticas por dispositivo -->
         <div class="col-md-6 mb-4">
             <div class="card h-100">
-                <div class="card-header">
+                <div class="card-header bg-info text-white">
                     <h5 class="mb-0">Por Dispositivo</h5>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
-                        <table class="table">
+                        <table class="table table-hover">
                             <thead>
                                 <tr>
                                     <th>Dispositivo</th>
