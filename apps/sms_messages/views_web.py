@@ -33,7 +33,7 @@ def message_list(request):
         primeira = messages.first()
 
     context = {
-        'messages': messages,  # ← NOME CORRETO
+        'sms_messages': messages,  # ← NOME CORRETO
         'total_messages': messages.count(),
         # ... outros campos
     }

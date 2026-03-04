@@ -43,7 +43,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for msg in messages %}
+                        {% for msg in sms_messages %}
                         <tr>
                             <td>{{ msg.message_date|date:"d/m/Y H:i" }}</td>
                             <td>{{ msg.phone_number }}</td>
