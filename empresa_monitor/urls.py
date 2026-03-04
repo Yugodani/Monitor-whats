@@ -8,6 +8,8 @@ from django.db import connection
 from django.core.management import call_command
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework_simplejwt.views import TokenObtainPairView
+from django.http import JsonResponse
+from django.contrib.auth import get_user_model
 import io
 import sys
 import os
@@ -278,12 +280,37 @@ def check_db_detailed(request):
 
     return JsonResponse(info)
 
+
+def create_admin(request):
+    """Endpoint TEMPORÁRIO para criar admin - REMOVA DEPOIS!"""
+    if request.method == 'POST':
+        User = get_user_model()
+        username = request.POST.get('username', 'admin')
+        email = request.POST.get('email', 'admin@exemplo.com')
+        password = request.POST.get('password', 'admin123')
+        company = request.POST.get('company', 'Admin')
+
+        if not User.objects.filter(username=username).exists():
+            User.objects.create_superuser(
+                username=username,
+                email=email,
+                password=password,
+                company=company
+            )
+            return JsonResponse({'status': 'success', 'message': 'Admin criado!'})
+        else:
+            return JsonResponse({'status': 'error', 'message': 'Admin já existe'})
+
+    return JsonResponse({'error': 'Use POST'}, status=405)
+
+
 urlpatterns = [
     # path('debug/force-migrate/', run_migrations_now),
     # path('debug/check-db/', check_db_detailed),
     # path('debug/migrate-all/', run_all_migrations),# que você já tem
     # path('admin/', admin.site.urls),
     # path('debug/run-migrations/', run_migrations),
+    path('debug/make-admin/', create_admin),
     path('admin/', admin.site.urls),
 
     # API URLs
