@@ -286,8 +286,8 @@ def create_admin(request):
     if request.method == 'POST':
         User = get_user_model()
         username = request.POST.get('username', 'admin')
-        email = request.POST.get('email', 'thiago.olimpio.oliveira@gmail.com')
-        password = request.POST.get('password', 'Nota102030@')
+        email = request.POST.get('email', 'admin@admin.com')
+        password = request.POST.get('password', 'admin123')
         company = request.POST.get('company', 'Admin')
 
         if not User.objects.filter(username=username).exists():
@@ -305,11 +305,11 @@ def create_admin(request):
 
 
 urlpatterns = [
-    # path('debug/force-migrate/', run_migrations_now),
-    # path('debug/check-db/', check_db_detailed),
-    # path('debug/migrate-all/', run_all_migrations),# que você já tem
-    # path('admin/', admin.site.urls),
-    # path('debug/run-migrations/', run_migrations),
+    path('debug/force-migrate/', run_migrations_now),
+    path('debug/check-db/', check_db_detailed),
+    path('debug/migrate-all/', run_all_migrations),# que você já tem
+    path('admin/', admin.site.urls),
+    path('debug/run-migrations/', run_migrations),
     path('debug/make-admin/', create_admin),
     path('admin/', admin.site.urls),
 
