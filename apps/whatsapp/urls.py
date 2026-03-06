@@ -2,14 +2,15 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from . import views
 
+# Criando o router
 router = DefaultRouter()
-router.register(r'messages', views.WhatsAppMessageViewSet, basename='whatsappmessage')
-router.register(r'chats', views.WhatsAppChatViewSet, basename='whatsappchat')
+router.register(r'messages', views.WhatsAppMessageViewSet, basename='whatsmessage')
+router.register(r'chats', views.WhatsAppChatViewSet, basename='whatschat')
 
 urlpatterns = [
+    # Inclui as URLs do router
     path('', include(router.urls)),
-    path('messages/sync/bulk/', views.bulk_sync_whatsapp, name='bulk_sync_whatsapp'),
-    path('messages/export/', views.export_whatsapp, name='export_whatsapp'),
-    path('messages/statistics/', views.whatsapp_statistics, name='whatsapp_statistics'),
-    path('chats/<str:chat_id>/messages/', views.chat_messages, name='chat_messages'),
+
+    # URLs adicionais
+    path('sync/bulk/', views.bulk_sync_whatsapp, name='bulk_sync_whatsapp'),
 ]

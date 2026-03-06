@@ -8,7 +8,6 @@ class WhatsAppMessageSerializer(serializers.ModelSerializer):
     class Meta:
         model = WhatsAppMessage
         fields = '__all__'
-        read_only_fields = ['id', 'synced_at']
 
 
 class WhatsAppChatSerializer(serializers.ModelSerializer):
@@ -17,4 +16,3 @@ class WhatsAppChatSerializer(serializers.ModelSerializer):
     class Meta:
         model = WhatsAppChat
         fields = '__all__'
-        read_only_fields = ['id', 'created_at', 'updated_at']
