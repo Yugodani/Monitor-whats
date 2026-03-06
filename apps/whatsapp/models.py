@@ -4,20 +4,119 @@ import uuid
 
 
 class WhatsAppMessage(models.Model):
+    MESSAGE_TYPE_CHOICES = [
+        ('text', 'Texto'),
+        ('image', 'Imagem'),
+        ('audio', 'Áudio'),
+        ('video', 'Vídeo'),
+        ('document', 'Documento'),
+        ('location', 'Localização'),
+        ('contact', 'Contato'),
+    ]
+
+    DIRECTION_CHOICES = [
+        ('sent', 'Enviada'),
+        ('received', 'Recebida'),
+    ]
+
+    STATUS_CHOICES = [
+        ('sent', 'Enviada'),
+        ('delivered', 'Entregue'),
+        ('read', 'Lida'),
+        ('failed', 'Falhou'),
+    ]
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     device = models.ForeignKey(Device, on_delete=models.CASCADE, related_name='whatsapp_messages')
 
-    phone_number = models.CharField(max_length=20, blank=True)
-    contact_name = models.CharField(max_length=255, blank=True, null=True)
-    content = models.TextField()
-    message_date = models.DateTimeField()
-    direction = models.CharField(max_length=10)  # 'sent' ou 'received'
-    is_read = models.BooleanField(default=False)
-    is_deleted = models.BooleanField(default=False)
+    # Message identifiers
+    whatsapp_message_id = models.CharField(max_length=255, blank=True)
+    chat_id = models.CharField(max_length=255, db_index=True, blank=True)
 
-    class Meta:
-        ordering = ['-message_date']
-        db_table = 'whatsapp_messages'
+    # Contact info
+    contact_name = models.CharField(max_length=255, blank=True, null=True)
+    phone_number = models.CharField(max_length=20, db_index=True, blank=True)
+    is_group = models.BooleanField(default=False)
+    group_name = models.CharField(max_length=255, blank=True)
+
+    # Message details
+    direction = models.CharField(max_length=20, choices=DIRECTION_CHOICES)
+    message_type = models.CharField(max_length=20, choices=MESSAGE_TYPE_CHOICES, default='text')
+    content = models.TextField(blank=True)
+
+    # Media
+    media_url = models.URLField(blank=True, null=True)
+    media_path = models.CharField(max_length=500, blank=True)
+    media_size = models.IntegerField(null=True, blank=True)
+    media_duration = models.IntegerField(null=True, blank=True)
+
+    # Status
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='sent')
+    is_read = models.BooleanField(default=False)
+
+    # Timestamps
+    message_date = models.DateTimeField(db_index=True)
+    synced_at = models.DateTimeField(auto_now_add=True)
+
+    # Deleted messages
+    is_deleted = models.BooleanField(default=False)
+    deleted_at = models.DateTimeField(null=True, blank=True)
+    original_content = models.TextField(blank=True)
+
+    # Quotes/Replies
+    quoted_message_id = models.CharField(max_length=255, blank=True)
+    quoted_content = models.TextField(blank=True)
 
     def __str__(self):
-        return f"{self.contact_name or self.phone_number} - {self.message_date}"
+        return f"WhatsApp {self.direction} - {self.contact_name or self.phone_number}"
+
+    class Meta:
+        db_table = 'whatsapp_messages'
+        ordering = ['-message_date']
+        indexes = [
+            models.Index(fields=['device', 'message_date']),
+            models.Index(fields=['chat_id', 'message_date']),
+            models.Index(fields=['is_deleted']),
+        ]
+
+
+class WhatsAppChat(models.Model):
+    """
+    Representa uma conversa/chat do WhatsApp
+    """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    device = models.ForeignKey(Device, on_delete=models.CASCADE, related_name='whatsapp_chats')
+
+    chat_id = models.CharField(max_length=255, unique=True)
+    contact_name = models.CharField(max_length=255, blank=True)
+    phone_number = models.CharField(max_length=20, blank=True)
+    is_group = models.BooleanField(default=False)
+    group_name = models.CharField(max_length=255, blank=True)
+
+    # Last message info
+    last_message = models.TextField(blank=True)
+    last_message_date = models.DateTimeField(null=True, blank=True)
+    last_message_type = models.CharField(max_length=20, blank=True)
+
+    # Statistics
+    total_messages = models.IntegerField(default=0)
+    unread_count = models.IntegerField(default=0)
+
+    # Settings
+    is_archived = models.BooleanField(default=False)
+    is_muted = models.BooleanField(default=False)
+    mute_expiration = models.DateTimeField(null=True, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.contact_name or self.phone_number or self.chat_id
+
+    class Meta:
+        db_table = 'whatsapp_chats'
+        ordering = ['-last_message_date']
+        indexes = [
+            models.Index(fields=['device', 'last_message_date']),
+            models.Index(fields=['chat_id']),
+        ]
