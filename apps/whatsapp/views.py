@@ -229,3 +229,25 @@ def delete_whatsapp_message(request, pk):
         return Response({'status': 'deleted'})
     except WhatsAppMessage.DoesNotExist:
         return Response({'error': 'Mensagem não encontrada'}, status=404)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def test_whatsapp(request):
+    """Endpoint de teste para verificar se está funcionando"""
+    from django.utils import timezone
+    from datetime import timedelta
+
+    # Criar uma mensagem de teste
+    device = Device.objects.filter(user=request.user).first()
+    if device:
+        msg = WhatsAppMessage.objects.create(
+            device=device,
+            phone_number="+5511999999999",
+            contact_name="Teste",
+            content="Mensagem de teste",
+            message_date=timezone.now(),
+            direction="received"
+        )
+        return Response({'status': 'ok', 'message_id': msg.id})
+    return Response({'error': 'No device'}, status=400)
