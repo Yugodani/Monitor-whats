@@ -6,6 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="b837bb31-3231-43ef-a108-c8c52e09fad1" name="Changes" comment="2.0">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/whatsapp/list.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/whatsapp/list.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -100,7 +101,8 @@
       <workItem from="1772709274186" duration="1503000" />
       <workItem from="1772736872908" duration="2649000" />
       <workItem from="1772763593192" duration="4169000" />
-      <workItem from="1772820004701" duration="1622000" />
+      <workItem from="1772820004701" duration="2252000" />
+      <workItem from="1772847690718" duration="389000" />
     </task>
     <task id="LOCAL-00001" summary="teste">
       <created>1771561100871</created>
