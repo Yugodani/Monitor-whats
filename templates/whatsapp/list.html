@@ -200,13 +200,15 @@
                             </td>
                             <td>{{ msg.device.device_name|truncatechars:15 }}</td>
                             <td>
-                                {% if msg.chat_id %}
-                                <a href="{% url 'whatsapp_chat_detail' msg.chat_id %}" class="btn btn-sm btn-info">
-                                    <i class="fas fa-comments"></i> Ver Chat
-                                </a>
-                                {% else %}
-                                <span class="text-muted">Sem chat</span>
-                                {% endif %}
+                                {% with chat_id=msg.chat_id|default:'' %}
+                                    {% if chat_id %}
+                                    <a href="{% url 'whatsapp_chat_detail' chat_id %}" class="btn btn-sm btn-primary">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    {% else %}
+                                    <span class="text-muted">-</span>
+                                    {% endif %}
+                                {% endwith %}
                             </td>
                         </tr>
                         {% empty %}
