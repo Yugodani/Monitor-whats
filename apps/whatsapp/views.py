@@ -72,50 +72,48 @@ class WhatsAppChatViewSet(viewsets.ReadOnlyModelViewSet):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def bulk_sync_whatsapp(request):
-    """
-    Sincroniza mensagens do WhatsApp de um dispositivo.
-    """
     device_id = request.data.get('device_id')
     messages_data = request.data.get('messages', [])
-
-    if not device_id:
-        return Response(
-            {'error': 'device_id é obrigatório'},
-            status=status.HTTP_400_BAD_REQUEST
-        )
 
     try:
         device = Device.objects.get(device_id=device_id, user=request.user)
     except Device.DoesNotExist:
-        return Response(
-            {'error': 'Dispositivo não encontrado'},
-            status=status.HTTP_404_NOT_FOUND
-        )
+        return Response({'error': 'Dispositivo não encontrado'}, status=404)
 
     created_count = 0
 
-    with transaction.atomic():
-        for msg_data in messages_data:
-            _, created = WhatsAppMessage.objects.update_or_create(
+    for msg_data in messages_data:
+        # Criar ou atualizar a mensagem
+        msg, created = WhatsAppMessage.objects.update_or_create(
+            device=device,
+            message_date=msg_data.get('message_date'),
+            phone_number=msg_data.get('phone_number', ''),
+            defaults={
+                'contact_name': msg_data.get('contact_name'),
+                'content': msg_data.get('content', ''),
+                'direction': msg_data.get('direction', 'received'),
+                'is_read': msg_data.get('is_read', False),
+                'chat_id': msg_data.get('chat_id', ''),  # ← SALVAR O CHAT_ID
+            }
+        )
+
+        # Atualizar ou criar o chat
+        if msg_data.get('chat_id'):
+            chat, _ = WhatsAppChat.objects.update_or_create(
                 device=device,
-                message_date=msg_data.get('message_date'),
-                phone_number=msg_data.get('phone_number', ''),
+                chat_id=msg_data.get('chat_id'),
                 defaults={
-                    'contact_name': msg_data.get('contact_name'),
-                    'content': msg_data.get('content', ''),
-                    'direction': msg_data.get('direction', 'received'),
-                    'is_read': msg_data.get('is_read', False),
+                    'contact_name': msg_data.get('contact_name', ''),
+                    'phone_number': msg_data.get('phone_number', ''),
+                    'last_message': msg_data.get('content', ''),
+                    'last_message_date': msg_data.get('message_date'),
                 }
             )
-            if created:
-                created_count += 1
 
-    return Response({
-        'success': True,
-        'created': created_count,
-        'total': len(messages_data)
-    })
+        if created:
+            created_count += 1
 
+    return Response({'created': created_count, 'total': len(messages_data)})
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
