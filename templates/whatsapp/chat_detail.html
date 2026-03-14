@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{{ chat.contact_name }} - WhatsApp - Monitor Empresarial{% endblock %}
+{% block title %}{{ chat.contact_name }} - WhatsApp{% endblock %}
 
 {% block content %}
 <div class="container-fluid">
@@ -22,180 +22,51 @@
             <div class="card">
                 <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">
-                        {% if chat.is_group %}
-                        <i class="fas fa-users me-2"></i>
-                        {% else %}
                         <i class="fas fa-user-circle me-2"></i>
-                        {% endif %}
                         {{ chat.contact_name }}
                         <small class="text-white-50 ms-2">{{ chat.phone_number }}</small>
                     </h5>
                     <div>
-                        {% if chat.is_group %}
-                        <span class="badge bg-light text-dark me-2">
-                            <i class="fas fa-users me-1"></i>Grupo: {{ chat.group_name }}
-                        </span>
-                        {% endif %}
                         <span class="badge bg-light text-dark me-2">
                             <i class="fas fa-envelope me-1"></i>{{ total_messages }} msgs
-                        </span>
-                        <span class="badge bg-light text-dark">
-                            <i class="fas fa-paperclip me-1"></i>{{ media_count }} mídias
                         </span>
                     </div>
                 </div>
 
                 <div class="card-body chat-container" style="height: 500px; overflow-y: auto;">
-                    {% for msg in messages %}
-                    <div class="message-bubble {% if msg.direction == 'sent' %}message-sent{% else %}message-received{% endif %}">
-                        <div class="message-header d-flex justify-content-between mb-1">
-                            <small>
-                                {% if msg.direction == 'sent' %}
-                                <i class="fas fa-check-circle text-white-50 me-1"></i>Eu
-                                {% else %}
-                                <i class="fas fa-user-circle text-muted me-1"></i>{{ msg.contact_name|default:msg.phone_number }}
-                                {% endif %}
-                            </small>
-                            <small class="text-muted">{{ msg.message_date|date:"d/m/Y H:i" }}</small>
+                    {% regroup messages by message_date|date:"d/m/Y" as messages_by_day %}
+
+                    {% for day in messages_by_day %}
+                        <div class="text-center mb-3">
+                            <span class="badge bg-secondary">{{ day.grouper }}</span>
                         </div>
-                        <div class="message-content">
-                            {% if msg.is_deleted %}
-                            <em class="text-danger">[Mensagem apagada]</em>
-                            {% else %}
-                            {{ msg.content|linebreaksbr }}
-                            {% endif %}
+
+                        {% for msg in day.list %}
+                        <div class="message-bubble {% if msg.direction == 'sent' %}message-sent{% else %}message-received{% endif %}">
+                            <div class="message-content">
+                                {{ msg.content|linebreaksbr }}
+                            </div>
+                            <div class="message-footer text-end mt-1">
+                                <small>{{ msg.message_date|date:"H:i" }}</small>
+                            </div>
                         </div>
-                        {% if msg.media_url %}
-                        <div class="message-attachment mt-2">
-                            {% if msg.message_type == 'image' %}
-                            <a href="{{ msg.media_url }}" target="_blank">
-                                <img src="{{ msg.media_url }}" alt="Imagem" class="img-fluid rounded" style="max-height: 200px;">
-                            </a>
-                            {% elif msg.message_type == 'audio' %}
-                            <audio controls class="w-100">
-                                <source src="{{ msg.media_url }}" type="audio/mpeg">
-                                Seu navegador não suporta áudio.
-                            </audio>
-                            {% elif msg.message_type == 'video' %}
-                            <video controls class="img-fluid rounded" style="max-height: 200px;">
-                                <source src="{{ msg.media_url }}" type="video/mp4">
-                                Seu navegador não suporta vídeo.
-                            </video>
-                            {% else %}
-                            <a href="{{ msg.media_url }}" target="_blank" class="btn btn-sm btn-outline-light">
-                                <i class="fas fa-paperclip me-1"></i>Ver anexo
-                            </a>
-                            {% endif %}
-                        </div>
-                        {% endif %}
-                        <div class="message-footer text-end mt-1">
-                            {% if msg.is_read and msg.direction == 'sent' %}
-                            <small class="text-white-50"><i class="fas fa-check-double"></i> Lida</small>
-                            {% elif msg.direction == 'sent' %}
-                            <small class="text-white-50"><i class="fas fa-check"></i> Entregue</small>
-                            {% endif %}
-                        </div>
-                    </div>
+                        {% endfor %}
                     {% empty %}
-                    <div class="text-center py-5">
-                        <i class="fab fa-whatsapp fa-4x text-muted mb-3"></i>
-                        <p class="text-muted">Nenhuma mensagem neste chat.</p>
-                    </div>
+                        <div class="text-center py-5">
+                            <i class="fab fa-whatsapp fa-4x text-muted mb-3"></i>
+                            <p class="text-muted">Nenhuma mensagem neste chat.</p>
+                        </div>
                     {% endfor %}
                 </div>
 
                 <div class="card-footer">
-                    <div class="row">
-                        <div class="col-12 d-flex justify-content-between">
-                            <a href="{% url 'whatsapp_chats' %}" class="btn btn-secondary">
-                                <i class="fas fa-arrow-left me-2"></i>Voltar
-                            </a>
-                            <div>
-                                {% if chat.is_archived %}
-                                <a href="{% url 'whatsapp_unarchive_chat' chat.chat_id %}" class="btn btn-outline-success">
-                                    <i class="fas fa-box-open me-2"></i>Desarquivar
-                                </a>
-                                {% else %}
-                                <a href="{% url 'whatsapp_archive_chat' chat.chat_id %}" class="btn btn-outline-warning" onclick="return confirm('Arquivar este chat?')">
-                                    <i class="fas fa-archive me-2"></i>Arquivar
-                                </a>
-                                {% endif %}
-
-                                {% if chat.is_muted %}
-                                <a href="{% url 'whatsapp_unmute_chat' chat.chat_id %}" class="btn btn-outline-info">
-                                    <i class="fas fa-volume-up me-2"></i>Ativar
-                                </a>
-                                {% else %}
-                                <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#muteModal">
-                                    <i class="fas fa-volume-mute me-2"></i>Silenciar
-                                </button>
-                                {% endif %}
-                            </div>
-                        </div>
-                    </div>
+                    <a href="{% url 'whatsapp_chats' %}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Voltar
+                    </a>
                 </div>
             </div>
         </div>
     </div>
-
-    <!-- Modal para silenciar -->
-    <div class="modal fade" id="muteModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Silenciar Chat</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <form action="{% url 'whatsapp_mute_chat' chat.chat_id %}" method="post">
-                    {% csrf_token %}
-                    <div class="modal-body">
-                        <p>Silenciar notificações para {{ chat.contact_name }}?</p>
-                        <select name="hours" class="form-select">
-                            <option value="1">1 hora</option>
-                            <option value="8">8 horas</option>
-                            <option value="24" selected>24 horas</option>
-                            <option value="168">1 semana</option>
-                        </select>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-warning">Silenciar</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Paginação -->
-    {% if messages.has_other_pages %}
-    <div class="row">
-        <div class="col-12">
-            <nav aria-label="Page navigation">
-                <ul class="pagination justify-content-center">
-                    {% if messages.has_previous %}
-                    <li class="page-item">
-                        <a class="page-link" href="?page={{ messages.previous_page_number }}">Anterior</a>
-                    </li>
-                    {% endif %}
-
-                    {% for num in messages.paginator.page_range %}
-                        {% if messages.number == num %}
-                        <li class="page-item active"><span class="page-link">{{ num }}</span></li>
-                        {% else %}
-                        <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
-                        {% endif %}
-                    {% endfor %}
-
-                    {% if messages.has_next %}
-                    <li class="page-item">
-                        <a class="page-link" href="?page={{ messages.next_page_number }}">Próxima</a>
-                    </li>
-                    {% endif %}
-                </ul>
-            </nav>
-        </div>
-    </div>
-    {% endif %}
 </div>
 
 <style>
@@ -204,7 +75,6 @@
     background-image: url('https://web.whatsapp.com/img/bg-chat-tile-dark_a4be512e7195b6b733d9110b408f075d.png');
     background-repeat: repeat;
     padding: 20px;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .message-bubble {
@@ -228,26 +98,9 @@
     border-bottom-left-radius: 4px;
 }
 
-.message-header small:last-child {
-    opacity: 0.7;
-}
-
-.message-sent .message-header small:last-child {
-    color: #075e54 !important;
-}
-
-.message-content {
-    word-wrap: break-word;
-    font-size: 14px;
-}
-
 .message-footer small {
     font-size: 11px;
     opacity: 0.7;
-}
-
-.message-sent .message-footer small {
-    color: #075e54;
 }
 </style>
 {% endblock %}
