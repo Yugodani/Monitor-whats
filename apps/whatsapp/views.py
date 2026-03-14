@@ -81,6 +81,7 @@ def bulk_sync_whatsapp(request):
         return Response({'error': 'Dispositivo não encontrado'}, status=404)
 
     created_count = 0
+    chat_ids = set()
 
     for msg_data in messages_data:
         # Criar ou atualizar a mensagem
@@ -93,25 +94,38 @@ def bulk_sync_whatsapp(request):
                 'content': msg_data.get('content', ''),
                 'direction': msg_data.get('direction', 'received'),
                 'is_read': msg_data.get('is_read', False),
-                'chat_id': msg_data.get('chat_id', ''),  # ← SALVAR O CHAT_ID
+                'chat_id': msg_data.get('chat_id', ''),
             }
         )
 
-        # Atualizar ou criar o chat
-        if msg_data.get('chat_id'):
-            chat, _ = WhatsAppChat.objects.update_or_create(
+        # Se tem chat_id, criar ou atualizar o chat
+        chat_id = msg_data.get('chat_id')
+        if chat_id and chat_id not in chat_ids:
+            chat_ids.add(chat_id)
+            WhatsAppChat.objects.update_or_create(
                 device=device,
-                chat_id=msg_data.get('chat_id'),
+                chat_id=chat_id,
                 defaults={
                     'contact_name': msg_data.get('contact_name', ''),
                     'phone_number': msg_data.get('phone_number', ''),
                     'last_message': msg_data.get('content', ''),
                     'last_message_date': msg_data.get('message_date'),
+                    'total_messages': WhatsAppMessage.objects.filter(
+                        device=device, chat_id=chat_id
+                    ).count(),
                 }
             )
 
         if created:
             created_count += 1
+
+    # Atualizar total de mensagens para cada chat
+    for chat_id in chat_ids:
+        WhatsAppChat.objects.filter(device=device, chat_id=chat_id).update(
+            total_messages=WhatsAppMessage.objects.filter(
+                device=device, chat_id=chat_id
+            ).count()
+        )
 
     return Response({'created': created_count, 'total': len(messages_data)})
 
