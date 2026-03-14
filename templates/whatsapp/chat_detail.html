@@ -38,7 +38,7 @@
 
                     {% for day in messages_by_day %}
                         <div class="text-center mb-3">
-                            <span class="badge bg-secondary">{{ day.grouper }}</span>
+                            <span class="badge date-badge">{{ day.grouper }}</span>
                         </div>
 
                         {% for msg in day.list %}
@@ -46,7 +46,7 @@
                             <div class="message-content">
                                 {{ msg.content|linebreaksbr }}
                             </div>
-                            <div class="message-footer text-end mt-1">
+                            <div class="message-footer text-end">
                                 <small>{{ msg.message_date|date:"H:i" }}</small>
                             </div>
                         </div>
@@ -75,6 +75,7 @@
     background-image: url('https://web.whatsapp.com/img/bg-chat-tile-dark_a4be512e7195b6b733d9110b408f075d.png');
     background-repeat: repeat;
     padding: 20px;
+    min-height: 500px;
 }
 
 .message-bubble {
@@ -84,23 +85,47 @@
     margin-bottom: 10px;
     clear: both;
     box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    word-wrap: break-word;
 }
 
+/* Mensagens enviadas (do usuário) */
 .message-sent {
-    background-color: #dcf8c6;
+    background-color: #dcf8c6;  /* Verde claro do WhatsApp */
+    color: #303030;  /* Texto escuro */
     float: right;
     border-bottom-right-radius: 4px;
 }
 
+/* Mensagens recebidas (de outras pessoas) */
 .message-received {
-    background-color: #ffffff;
+    background-color: #ffffff;  /* Branco */
+    color: #111111;  /* Texto preto */
     float: left;
     border-bottom-left-radius: 4px;
 }
 
-.message-footer small {
+.message-footer {
+    margin-top: 4px;
     font-size: 11px;
     opacity: 0.7;
+}
+
+.message-sent .message-footer {
+    color: #075e54;  /* Verde escuro do WhatsApp */
+}
+
+.message-received .message-footer {
+    color: #666666;  /* Cinza */
+}
+
+.date-badge {
+    background-color: rgba(225, 245, 254, 0.92);
+    color: #1f7b8c;
+    padding: 4px 12px;
+    border-radius: 16px;
+    font-size: 12px;
+    font-weight: normal;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
 }
 </style>
 {% endblock %}
