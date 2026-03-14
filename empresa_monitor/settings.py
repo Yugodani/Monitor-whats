@@ -69,15 +69,15 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',  # Whitenoise for static files
-    'corsheaders.middleware.CorsMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+     # 'django.middleware.security.SecurityMiddleware',
+     # 'whitenoise.middleware.WhiteNoiseMiddleware',  # Whitenoise for static files
+     # 'corsheaders.middleware.CorsMiddleware',
+     # 'django.contrib.sessions.middleware.SessionMiddleware',
+     # 'django.middleware.common.CommonMiddleware',
+     # 'django.middleware.csrf.CsrfViewMiddleware',
+     # 'django.contrib.auth.middleware.AuthenticationMiddleware',
+     # 'django.contrib.messages.middleware.MessageMiddleware',
+     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
 ROOT_URLCONF = 'empresa_monitor.urls'
@@ -220,7 +220,12 @@ if not DEBUG:
 # CSRF settings
 CSRF_COOKIE_DOMAIN = '.onrender.com'  # Nota: começa com ponto
 CSRF_TRUSTED_ORIGINS = [
-    '*'
+    'https://monitor-whats-53jh.onrender.com',
+    'http://monitor-whats-53jh.onrender.com',
+    'http://localhost:8000',                     # Desenvolvimento local
+    'http://127.0.0.1:8000',                     # Desenvolvimento local
+    'http://10.0.2.2:8000',                      # Emulador Android
+    'http://localhost',                           # Acessos diretos
 ]
 
 # CSRF e Cookie settings
