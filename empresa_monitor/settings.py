@@ -27,14 +27,14 @@ except Exception as e:
             raise ValueError("SECRET_KEY não configurada!")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DEBUG', 'False') == 'False'
+DEBUG = False
 
 # ALLOWED_HOSTS configuration
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split(',')
-ALLOWED_HOSTS = [host.strip() for host in ALLOWED_HOSTS if host.strip()]
-
-# Add localhost always
-ALLOWED_HOSTS.extend(['localhost', '127.0.0.1', '0.0.0.0'])
+ALLOWED_HOSTS = [
+    'monitor-whats-53jh.onrender.com',  # Seu domínio no Render
+    'localhost',
+    '127.0.0.1',
+]
 
 # Add Render host if in production
 if 'RENDER' in os.environ:
@@ -220,22 +220,13 @@ if not DEBUG:
 # CSRF settings
 CSRF_COOKIE_DOMAIN = '.onrender.com'  # Nota: começa com ponto
 CSRF_TRUSTED_ORIGINS = [
-    'https://monitor-whats-53jh.onrender.com',
-    'http://monitor-whats-53jh.onrender.com',
-    'http://localhost:8000',                     # Desenvolvimento local
-    'http://127.0.0.1:8000',                     # Desenvolvimento local
-    'http://10.0.2.2:8000',                      # Emulador Android
-    'http://localhost',                           # Acessos diretos
+    'https://monitor-whats-53jh.onrender.com',  # Seu site
 ]
 
 # CSRF e Cookie settings
-CSRF_COOKIE_SECURE = not DEBUG  # True em produção, False em desenvolvimento
-CSRF_COOKIE_HTTPONLY = False  # Necessário para JavaScript ler o cookie
-CSRF_COOKIE_SAMESITE = 'Lax'  # Ou 'Strict' para mais segurança
-CSRF_USE_SESSIONS = False  # Usar cookies em vez de sessões
-
-# Session settings
-SESSION_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SECURE = True   # Só envia cookie por HTTPS
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SAMESITE = 'Lax'
 SESSION_COOKIE_SAMESITE = 'Lax'
 
 # CORS settings (se estiver usando CORS)
