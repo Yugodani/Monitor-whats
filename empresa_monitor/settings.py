@@ -57,7 +57,7 @@ INSTALLED_APPS = [
     'apps.sms_messages',
     'apps.whatsapp',
     'mobile_api',
-    'screenshots',
+    'apps.screenshots',
 ]
 
 # ========== MIDDLEWARE ==========

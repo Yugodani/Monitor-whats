@@ -8,8 +8,7 @@ class ScreenshotSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Screenshot
-        fields = ['id', 'device', 'device_name', 'image', 'image_url', 'timestamp', 'file_size']
-        read_only_fields = ['id', 'timestamp', 'file_size']
+        fields = '__all__'
 
     def get_image_url(self, obj):
         request = self.context.get('request')

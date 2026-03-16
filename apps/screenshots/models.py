@@ -7,8 +7,8 @@ import os
 def screenshot_upload_path(instance, filename):
     """Gera caminho único para cada screenshot"""
     ext = filename.split('.')[-1]
-    filename = f"{instance.device.device_id}_{instance.timestamp.strftime('%Y%m%d_%H%M%S')}.{ext}"
-    return os.path.join('screenshots', filename)
+    new_filename = f"{instance.device.device_id}_{instance.timestamp.strftime('%Y%m%d_%H%M%S')}.{ext}"
+    return os.path.join('screenshots', new_filename)
 
 
 class Screenshot(models.Model):
@@ -17,16 +17,9 @@ class Screenshot(models.Model):
     image = models.ImageField(upload_to=screenshot_upload_path)
     timestamp = models.DateTimeField(auto_now_add=True)
     uploaded_at = models.DateTimeField(auto_now_add=True)
-    file_size = models.IntegerField(default=0)  # Tamanho em bytes
+    file_size = models.IntegerField(default=0)
+    is_viewed = models.BooleanField(default=False)
 
     class Meta:
         ordering = ['-timestamp']
         db_table = 'screenshots'
-
-    def __str__(self):
-        return f"Screenshot {self.device.device_id} - {self.timestamp}"
-
-    def save(self, *args, **kwargs):
-        if self.image:
-            self.file_size = self.image.size
-        super().save(*args, **kwargs)

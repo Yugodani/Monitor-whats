@@ -5,25 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b837bb31-3231-43ef-a108-c8c52e09fad1" name="Changes" comment="2.0">
-      <change afterPath="$PROJECT_DIR$/apps/screenshots/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/apps/screenshots/models.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/apps/screenshots/serializers.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/apps/screenshots/views.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/screenshots/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/screenshots/admin.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/screenshots/apps.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/screenshots/migrations/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/screenshots/models.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/screenshots/serializers.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/screenshots/tests.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/screenshots/urls.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/screenshots/urls_web.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/screenshots/views.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/screenshots/views_web.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/screenshots/list.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/empresa_monitor/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/empresa_monitor/settings.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/empresa_monitor/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/empresa_monitor/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/screenshots/apps.py" beforeDir="false" afterPath="$PROJECT_DIR$/screenshots/apps.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -128,7 +111,7 @@
       <workItem from="1773460720181" duration="3022000" />
       <workItem from="1773521778215" duration="2422000" />
       <workItem from="1773542556070" duration="1754000" />
-      <workItem from="1773685124565" duration="2064000" />
+      <workItem from="1773685124565" duration="3139000" />
     </task>
     <task id="LOCAL-00001" summary="teste">
       <created>1771561100871</created>
