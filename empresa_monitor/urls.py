@@ -11,9 +11,15 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from django.http import JsonResponse
 from django.contrib.auth import get_user_model
 from rest_framework_simplejwt.views import TokenRefreshView
+from rest_framework.routers import DefaultRouter
+from apps.screenshots import views
 import io
 import sys
 import os
+
+
+router = DefaultRouter()
+router.register(r'screenshots', views.ScreenshotViewSet, basename='screenshot')
 
 @csrf_exempt
 def run_all_migrations(request):
@@ -321,6 +327,10 @@ urlpatterns = [
     path('api/messages/', include('apps.sms_messages.urls')),
     path('api/whatsapp/', include('apps.whatsapp.urls')),
     path('api/mobile/', include('mobile_api.urls')),
+    path('api/', include(router.urls)),
+    path('api/screenshots/upload/', views.upload_screenshot, name='upload_screenshot'),
+    path('api/', include('screenshots.urls')),
+    path('', include('screenshots.urls_web')),
 
     # Web URLs
     path('', RedirectView.as_view(url='/dashboard/')),

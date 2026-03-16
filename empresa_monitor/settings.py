@@ -57,6 +57,7 @@ INSTALLED_APPS = [
     'apps.sms_messages',
     'apps.whatsapp',
     'mobile_api',
+    'screenshots',
 ]
 
 # ========== MIDDLEWARE ==========
@@ -125,6 +126,10 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 os.makedirs(MEDIA_ROOT, exist_ok=True)
+
+# Limite de tamanho para upload
+DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB
+FILE_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024   # 10MB
 
 # ========== CONFIGURAÇÕES DO DJANGO ==========
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
