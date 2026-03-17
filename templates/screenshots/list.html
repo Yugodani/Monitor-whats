@@ -1,21 +1,31 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="container-fluid">
-    <h2>Screenshots ({{ total }})</h2>
+<div class="container">
+    <h2>Screenshots</h2>
 
-    <div class="row">
-        {% for screenshot in screenshots %}
-        <div class="col-md-3 mb-3">
-            <div class="card">
-                <img src="{{ screenshot.image.url }}" class="card-img-top">
-                <div class="card-body">
-                    <p>{{ screenshot.device.device_name }}</p>
-                    <small>{{ screenshot.timestamp }}</small>
+    <div class="alert alert-info">
+        Total de screenshots: <strong>{{ total }}</strong>
+    </div>
+
+    {% if screenshots %}
+        <div class="row">
+            {% for screenshot in screenshots %}
+            <div class="col-md-4 mb-3">
+                <div class="card">
+                    <img src="{{ screenshot.image.url }}" class="card-img-top" style="height: 200px; object-fit: cover;">
+                    <div class="card-body">
+                        <h6>{{ screenshot.device.device_name }}</h6>
+                        <small>{{ screenshot.timestamp|date:"d/m/Y H:i:s" }}</small>
+                    </div>
                 </div>
             </div>
+            {% endfor %}
         </div>
-        {% endfor %}
-    </div>
+    {% else %}
+        <div class="alert alert-warning">
+            Nenhum screenshot encontrado.
+        </div>
+    {% endif %}
 </div>
 {% endblock %}
