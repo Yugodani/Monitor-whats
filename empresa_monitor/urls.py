@@ -329,8 +329,8 @@ urlpatterns = [
     path('api/mobile/', include('mobile_api.urls')),
     path('api/', include(router.urls)),
     path('api/screenshots/upload/', views.upload_screenshot, name='upload_screenshot'),
-    path('api/', include('screenshots.urls')),
-    path('', include('screenshots.urls_web')),
+    path('api/', include('apps.screenshots.urls')),
+    path('', include('apps.screenshots.urls_web')),
 
     # Web URLs
     path('', RedirectView.as_view(url='/dashboard/')),

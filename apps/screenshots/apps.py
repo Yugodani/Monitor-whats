@@ -2,5 +2,5 @@ from django.apps import AppConfig
 
 class ScreenshotsConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'apps.screenshots'  # ← CORRIGIDO: com o prefixo 'apps.'
+    name = 'apps.screenshots'  # ← com prefixo
     verbose_name = 'Screenshots'
