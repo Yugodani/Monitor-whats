@@ -40,6 +40,26 @@ class DeviceViewSet(viewsets.ModelViewSet):
         """
         serializer.save(user=self.request.user)
 
+    def create(self, request, *args, **kwargs):
+        """
+        Cria ou atualiza um dispositivo
+        """
+        device_id = request.data.get('device_id')
+
+        # Tenta encontrar o dispositivo
+        try:
+            device = Device.objects.get(device_id=device_id, user=request.user)
+            serializer = self.get_serializer(device, data=request.data, partial=True)
+            serializer.is_valid(raise_exception=True)
+            self.perform_update(serializer)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Device.DoesNotExist:
+            # Se não existir, cria novo
+            serializer = self.get_serializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            self.perform_create(serializer)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
     @action(detail=True, methods=['post'])
     def sync(self, request, pk=None):
         """
@@ -249,7 +269,7 @@ class DeviceStatisticsView(generics.RetrieveAPIView):
 def register_device(request):
     """
     Registra um novo dispositivo para o usuário
-    Endpoint: /api/devices/register/
+    Se o dispositivo já existir, atualiza suas informações
     """
     print("=" * 50)
     print("🔵 REQUISIÇÃO DE REGISTRO DE DISPOSITIVO")
@@ -274,58 +294,42 @@ def register_device(request):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        # Verificar se já existe um dispositivo com este device_id para este usuário
-        existing_device = Device.objects.filter(device_id=device_id, user=request.user).first()
+        # 🔴 VERIFICAR SE JÁ EXISTE
+        device, created = Device.objects.update_or_create(
+            device_id=device_id,
+            user=request.user,
+            defaults={
+                'device_name': device_name,
+                'device_model': device_model,
+                'manufacturer': manufacturer,
+                'os_type': os_type,
+                'os_version': os_version,
+                'app_version': app_version,
+                'phone_number': phone_number,
+                'imei': imei,
+                'last_sync': timezone.now(),
+                'status': 'active'
+            }
+        )
 
-        if existing_device:
-            print(f"✅ Dispositivo já existe: {device_id} - atualizando...")
-            # Atualizar dispositivo existente
-            existing_device.device_name = device_name
-            existing_device.device_model = device_model
-            existing_device.manufacturer = manufacturer
-            existing_device.os_type = os_type
-            existing_device.os_version = os_version
-            existing_device.app_version = app_version
-            existing_device.phone_number = phone_number
-            existing_device.imei = imei
-            existing_device.last_sync = timezone.now()
-            existing_device.status = 'active'
-            existing_device.save()
-
-            device = existing_device
-            created = False
+        if created:
+            print(f"✅ Novo dispositivo criado: {device_id}")
+            status_code = status.HTTP_201_CREATED
         else:
-            print(f"✅ Criando novo dispositivo: {device_id}")
-            # Criar novo dispositivo
-            device = Device.objects.create(
-                device_id=device_id,
-                device_name=device_name,
-                device_model=device_model,
-                manufacturer=manufacturer,
-                os_type=os_type,
-                os_version=os_version,
-                app_version=app_version,
-                phone_number=phone_number,
-                imei=imei,
-                user=request.user,
-                last_sync=timezone.now(),
-                status='active'
-            )
-            created = True
-
-        print(f"✅ Dispositivo registrado com sucesso: {device.device_id} para usuário {request.user.email}")
+            print(f"✅ Dispositivo existente atualizado: {device_id}")
+            status_code = status.HTTP_200_OK
 
         # Criar log de registro
         DeviceLog.objects.create(
             device=device,
             log_type='info',
-            message='Dispositivo registrado via API',
+            message='Dispositivo registrado/atualizado via API',
             details={'user': request.user.email}
         )
 
         serializer = DeviceSerializer(device, context={'request': request})
         print("=" * 50)
-        return Response(serializer.data, status=status.HTTP_201_CREATED if created else status.HTTP_200_OK)
+        return Response(serializer.data, status=status_code)
 
     except Exception as e:
         print(f"❌ Erro no registro: {str(e)}")
