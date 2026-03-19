@@ -8,6 +8,7 @@ router.register(r'logs', views.DeviceLogViewSet, basename='devicelog')
 
 urlpatterns = [
     path('', include(router.urls)),
+    path('devices/register/', views.register_device, name='register_device'),
     path('devices/bulk-action/', views.bulk_device_action, name='bulk_device_action'),
     path('devices/statistics/', views.device_statistics, name='device_statistics'),
     path('devices/stats/', views.DeviceStatisticsView.as_view(), name='device_stats'),

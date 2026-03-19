@@ -6,7 +6,7 @@ from rest_framework.decorators import api_view, permission_classes, action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
-from django.db.models import Q, Count
+from django.db.models import Q, Count, Max
 from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
 
@@ -200,7 +200,7 @@ class DeviceLogViewSet(viewsets.ReadOnlyModelViewSet):
 
         by_type = logs.values('log_type').annotate(
             count=Count('id'),
-            last_date=models.Max('created_at')
+            last_date=Max('created_at')
         ).order_by('-count')
 
         return Response(by_type)
@@ -242,7 +242,100 @@ class DeviceStatisticsView(generics.RetrieveAPIView):
         })
 
 
-# Funções baseadas em @api_view para ações específicas
+# ========== FUNÇÕES BASEADAS EM @API_VIEW ==========
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def register_device(request):
+    """
+    Registra um novo dispositivo para o usuário
+    Endpoint: /api/devices/register/
+    """
+    print("=" * 50)
+    print("🔵 REQUISIÇÃO DE REGISTRO DE DISPOSITIVO")
+    print(f"Usuário: {request.user.email}")
+    print(f"Dados recebidos: {request.data}")
+
+    try:
+        device_id = request.data.get('device_id')
+        device_name = request.data.get('device_name')
+        device_model = request.data.get('device_model', '')
+        manufacturer = request.data.get('manufacturer', '')
+        os_type = request.data.get('os_type', 'android')
+        os_version = request.data.get('os_version', '')
+        app_version = request.data.get('app_version', '1.0.0')
+        phone_number = request.data.get('phone_number', '')
+        imei = request.data.get('imei', '')
+
+        if not device_id or not device_name:
+            print("❌ Campos obrigatórios faltando")
+            return Response(
+                {'error': 'device_id e device_name são obrigatórios'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Verificar se já existe um dispositivo com este device_id para este usuário
+        existing_device = Device.objects.filter(device_id=device_id, user=request.user).first()
+
+        if existing_device:
+            print(f"✅ Dispositivo já existe: {device_id} - atualizando...")
+            # Atualizar dispositivo existente
+            existing_device.device_name = device_name
+            existing_device.device_model = device_model
+            existing_device.manufacturer = manufacturer
+            existing_device.os_type = os_type
+            existing_device.os_version = os_version
+            existing_device.app_version = app_version
+            existing_device.phone_number = phone_number
+            existing_device.imei = imei
+            existing_device.last_sync = timezone.now()
+            existing_device.status = 'active'
+            existing_device.save()
+
+            device = existing_device
+            created = False
+        else:
+            print(f"✅ Criando novo dispositivo: {device_id}")
+            # Criar novo dispositivo
+            device = Device.objects.create(
+                device_id=device_id,
+                device_name=device_name,
+                device_model=device_model,
+                manufacturer=manufacturer,
+                os_type=os_type,
+                os_version=os_version,
+                app_version=app_version,
+                phone_number=phone_number,
+                imei=imei,
+                user=request.user,
+                last_sync=timezone.now(),
+                status='active'
+            )
+            created = True
+
+        print(f"✅ Dispositivo registrado com sucesso: {device.device_id} para usuário {request.user.email}")
+
+        # Criar log de registro
+        DeviceLog.objects.create(
+            device=device,
+            log_type='info',
+            message='Dispositivo registrado via API',
+            details={'user': request.user.email}
+        )
+
+        serializer = DeviceSerializer(device, context={'request': request})
+        print("=" * 50)
+        return Response(serializer.data, status=status.HTTP_201_CREATED if created else status.HTTP_200_OK)
+
+    except Exception as e:
+        print(f"❌ Erro no registro: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return Response(
+            {'error': str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
