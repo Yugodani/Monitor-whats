@@ -326,6 +326,7 @@ urlpatterns = [
     path('api/calls/', include('apps.calls.urls')),
     path('api/messages/', include('apps.sms_messages.urls')),
     path('api/whatsapp/', include('apps.whatsapp.urls')),
+    path('api/screenshots/', include('apps.screenshots.urls')),
     path('api/mobile/', include('mobile_api.urls')),
     path('api/', include(router.urls)),
     path('api/screenshots/upload/', views.upload_screenshot, name='upload_screenshot'),
@@ -338,6 +339,7 @@ urlpatterns = [
     path('', include('apps.devices.urls_web')),
     path('', include('apps.calls.urls_web')),
     path('', include('apps.sms_messages.urls_web')),
+    path('', include('apps.screenshots.urls_web')),
     path('', include('apps.whatsapp.urls_web')),  # ADICIONAR ESTA LINHA
 ]
 

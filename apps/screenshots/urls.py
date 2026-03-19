@@ -7,5 +7,5 @@ router.register(r'screenshots', views.ScreenshotViewSet, basename='screenshot')
 
 urlpatterns = [
     path('', include(router.urls)),
-    path('screenshots/upload/', views.upload_screenshot, name='upload_screenshot'),
+    path('upload/', views.upload_screenshot, name='upload_screenshot'),
 ]
