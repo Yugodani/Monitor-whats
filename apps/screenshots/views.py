@@ -48,18 +48,16 @@ def upload_screenshot(request):
     print(f"🔵 UPLOAD SCREENSHOT RECEBIDO")
     print(f"Data: {timezone.now()}")
     print(f"Usuário: {request.user.email}")
-    print(f"Método: {request.method}")
-    print(f"Content-Type: {request.content_type}")
-    print(f"FILES keys: {list(request.FILES.keys())}")
-    print(f"POST keys: {list(request.POST.keys())}")
 
-    device_id = request.data.get('device_id')
+    device_id_raw = request.data.get('device_id')
     image_file = request.FILES.get('image')
     timestamp = request.data.get('timestamp')
 
-    print(f"device_id: {device_id}")
-    print(f"type(device_id): {type(device_id)}")
-    print(f"repr(device_id): {repr(device_id)}")
+    # 🔴 LIMPAR O device_id - REMOVER ASPAS
+    device_id = device_id_raw.strip('"') if device_id_raw else None
+
+    print(f"device_id_raw: {device_id_raw}")
+    print(f"device_id_clean: {device_id}")
     print(f"image_file: {image_file.name if image_file else 'NENHUM'}")
     print(f"timestamp: {timestamp}")
 
@@ -75,17 +73,15 @@ def upload_screenshot(request):
     devices = Device.objects.filter(user=request.user)
     print(f"Total de dispositivos: {devices.count()}")
     for d in devices:
-        print(
-            f"   - device_id: '{d.device_id}' | nome: {d.device_name} | status: {d.status} | last_sync: {d.last_sync}")
+        print(f"   - device_id: '{d.device_id}' | nome: {d.device_name} | status: {d.status}")
 
     try:
-        # Tentar buscar o dispositivo
         device = Device.objects.get(device_id=device_id, user=request.user)
-        print(f"✅ Dispositivo ENCONTRADO: {device.device_name} (ID: {device.id})")
-
+        print(f"✅ Dispositivo ENCONTRADO: {device.device_name}")
     except Device.DoesNotExist:
         print(f"❌ Dispositivo NÃO encontrado: '{device_id}'")
-        print(f"   Dica: Compare com os device_ids listados acima")
+        print(f"   device_id_raw: '{device_id_raw}'")
+        print(f"   device_id_clean: '{device_id}'")
         return Response(
             {'error': 'Dispositivo não encontrado'},
             status=status.HTTP_404_NOT_FOUND
