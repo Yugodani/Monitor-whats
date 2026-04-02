@@ -3,16 +3,16 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.views.generic import RedirectView
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView  # ← ADICIONAR
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
 
-    # 🔴 ADICIONAR URLs DE AUTENTICAÇÃO JWT
+    # ========== URLs DE AUTENTICAÇÃO JWT ==========
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 
-    # API URLs
+    # ========== URLs DAS APIS ==========
     path('api/auth/', include('apps.accounts.urls')),
     path('api/devices/', include('apps.devices.urls')),
     path('api/calls/', include('apps.calls.urls')),
@@ -21,7 +21,7 @@ urlpatterns = [
     path('api/screenshots/', include('apps.screenshots.urls')),
     path('api/mobile/', include('mobile_api.urls')),
 
-    # Web URLs
+    # ========== URLs WEB ==========
     path('', RedirectView.as_view(url='/dashboard/')),
     path('', include('apps.accounts.urls_web')),
     path('', include('apps.devices.urls_web')),
