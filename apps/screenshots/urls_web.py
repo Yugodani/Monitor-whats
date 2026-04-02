@@ -1,6 +1,9 @@
+"""
+URLs web para o app screenshots
+"""
 from django.urls import path
-from . import views_web
+from . import views
 
 urlpatterns = [
-    path('screenshots/', views_web.screenshot_list, name='screenshot_list'),  # ← DEVE SER 'screenshots/'
+    path('screenshots/', views.screenshot_list, name='screenshot_list'),
 ]
