@@ -6,15 +6,18 @@ from datetime import timedelta
 from .models import Screenshot
 import logging
 
+import logging
+
 logger = logging.getLogger(__name__)
 
 
 @login_required
 def screenshot_list(request):
-    user = request.user
-    print(f"🔍 Usuário: {user.email}")
-    print(f"🔍 User ID: {user.id}")
+    print("=" * 60)
+    print("🔍 VIEW SCREENSHOT_LIST CHAMADA")
+    print(f"Usuário: {request.user.email}")
 
+    user = request.user
     screenshots = Screenshot.objects.filter(
         device__user=user
     ).select_related('device').order_by('-timestamp')
@@ -25,8 +28,7 @@ def screenshot_list(request):
         print(f"  - ID: {s.id}")
         print(f"    Device: {s.device.device_name}")
         print(f"    Timestamp: {s.timestamp}")
-        print(f"    Image URL: {s.image.url}")
-        print(f"    Image path: {s.image.path}")
+        print(f"    Image URL: {s.image.url if s.image else 'SEM IMAGEM'}")
 
     paginator = Paginator(screenshots, 24)
     page = request.GET.get('page')
