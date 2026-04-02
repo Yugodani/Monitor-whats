@@ -3,9 +3,14 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.views.generic import RedirectView
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView  # ← ADICIONAR
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+
+    # 🔴 ADICIONAR URLs DE AUTENTICAÇÃO JWT
+    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 
     # API URLs
     path('api/auth/', include('apps.accounts.urls')),
@@ -13,7 +18,7 @@ urlpatterns = [
     path('api/calls/', include('apps.calls.urls')),
     path('api/messages/', include('apps.sms_messages.urls')),
     path('api/whatsapp/', include('apps.whatsapp.urls')),
-    path('api/screenshots/', include('apps.screenshots.urls')),  # ← ADICIONE ESTA
+    path('api/screenshots/', include('apps.screenshots.urls')),
     path('api/mobile/', include('mobile_api.urls')),
 
     # Web URLs
@@ -23,7 +28,7 @@ urlpatterns = [
     path('', include('apps.calls.urls_web')),
     path('', include('apps.sms_messages.urls_web')),
     path('', include('apps.whatsapp.urls_web')),
-    path('', include('apps.screenshots.urls_web')),  # ← ADICIONE ESTA
+    path('', include('apps.screenshots.urls_web')),
 ]
 
 if settings.DEBUG:
