@@ -9,3 +9,6 @@ urlpatterns = [
     path('', include(router.urls)),
     path('upload/', views.upload_screenshot, name='upload_screenshot'),
 ]
+# apps/screenshots/urls.py
+print("✅ URLs do screenshots carregadas!")
+print("   - /upload/ disponível")
