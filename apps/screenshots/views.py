@@ -102,18 +102,25 @@ class ScreenshotViewSet(viewsets.ModelViewSet):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def upload_screenshot(request):
-    """
-    Endpoint para upload de screenshots
-    """
     print("=" * 60)
-    print(f"🔵 UPLOAD RECEBIDO - {timezone.now()}")
+    print(f"🔵 UPLOAD SCREENSHOT RECEBIDO")
+    print(f"Data: {timezone.now()}")
     print(f"Usuário: {request.user.email}")
+    print(f"Método: {request.method}")
+    print(f"Content-Type: {request.content_type}")
+    print(f"FILES keys: {list(request.FILES.keys())}")
+    print(f"POST keys: {list(request.POST.keys())}")
 
     device_id = request.data.get('device_id')
     image_file = request.FILES.get('image')
     timestamp = request.data.get('timestamp')
 
+    print(f"device_id: {device_id}")
+    print(f"image_file: {image_file.name if image_file else 'NENHUM'}")
+    print(f"timestamp: {timestamp}")
+
     if not device_id or not image_file:
+        print("❌ Campos obrigatórios faltando")
         return Response(
             {'error': 'device_id e image são obrigatórios'},
             status=status.HTTP_400_BAD_REQUEST
@@ -121,38 +128,57 @@ def upload_screenshot(request):
 
     try:
         device = Device.objects.get(device_id=device_id, user=request.user)
+        print(f"✅ Dispositivo encontrado: {device.device_name}")
     except Device.DoesNotExist:
+        print(f"❌ Dispositivo NÃO encontrado: {device_id}")
         return Response(
             {'error': 'Dispositivo não encontrado'},
             status=status.HTTP_404_NOT_FOUND
         )
 
     # Validar tipo de arquivo
+    print(f"Content type: {image_file.content_type}")
     if not image_file.content_type.startswith('image/'):
+        print(f"❌ Tipo de arquivo inválido")
         return Response(
             {'error': 'Arquivo deve ser uma imagem'},
             status=status.HTTP_400_BAD_REQUEST
         )
 
     # Validar tamanho
+    print(f"Tamanho: {image_file.size} bytes")
     if image_file.size > 10 * 1024 * 1024:
+        print(f"❌ Arquivo muito grande")
         return Response(
             {'error': 'Imagem muito grande (máx 10MB)'},
             status=status.HTTP_400_BAD_REQUEST
         )
 
     # Criar screenshot
-    screenshot = Screenshot.objects.create(
-        device=device,
-        image=image_file,
-        timestamp=timezone.now()
-    )
+    try:
+        screenshot = Screenshot.objects.create(
+            device=device,
+            image=image_file,
+            timestamp=timezone.now()
+        )
 
-    print(f"✅ Screenshot criado! ID: {screenshot.id}")
+        print(f"✅ Screenshot CRIADO! ID: {screenshot.id}")
+        print(f"   Caminho: {screenshot.image.path}")
+        print(f"   URL: {screenshot.image.url}")
+        print("=" * 60)
 
-    return Response({
-        'id': str(screenshot.id),
-        'url': request.build_absolute_uri(screenshot.image.url),
-        'timestamp': screenshot.timestamp,
-        'file_size': screenshot.file_size
-    }, status=status.HTTP_201_CREATED)
+        return Response({
+            'id': str(screenshot.id),
+            'url': request.build_absolute_uri(screenshot.image.url),
+            'timestamp': screenshot.timestamp,
+            'file_size': screenshot.file_size
+        }, status=status.HTTP_201_CREATED)
+
+    except Exception as e:
+        print(f"❌ Erro ao criar screenshot: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return Response(
+            {'error': str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
